@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Digital Business Card</title>
+  <style>
+    .card-container {
+      max-width: 400px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .profile-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 2/3;
+      /* Or set a fixed height */
+      overflow: visible;
+    }
+
+    .profile-wrapper img.profile {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      clip-path: url(#s-curve-clip);
+    }
+
+
+    .profile-wrapper img.logo {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: white;
+      padding: 5px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      object-fit: contain;
+      transform: translate(20%, 20%);
+      /* overlap the profile image bottom-right */
+    }
+
+    /* 2nd row: Left vertical bar with 3 rows of info aligned */
+    .info-row {
+      display: flex;
+      padding: 15px 20px;
+      background: #e9ecef;
+    }
+
+    .info-bar {
+      background: white;
+      color: black;
+      width: 120px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 15px 10px;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .info-bar div {
+      margin-bottom: 8px;
+      font-weight: 600;
+      font-size: 1.1em;
+    }
+
+    .info-bar div:last-child {
+      margin-bottom: 0;
+    }
+
+    /* 3rd row: Two images side by side (App icon and QR code) */
+    .app-qr-row {
+      display: flex;
+      justify-content: space-around;
+      padding: 20px;
+      background: #fff;
+    }
+
+    .app-qr-row img {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    /* 4th row: Contact info with clickable icons and text */
+    .contact-row {
+      display: flex;
+      justify-content: space-around;
+      padding: 15px 20px;
+      background: #e9ecef;
+      font-size: 1em;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: green;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .contact-item:hover {
+      text-decoration: underline;
+    }
+
+    .contact-item img {
+      width: 24px;
+      height: 24px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="card-container">
+
+    <!-- 1st row -->
+
+    <div class="profile-wrapper">
+      <img src="profile.jpg" alt="Profile Photo" class="profile" />
+      <img src="logo.jpg" alt="Logo" class="logo" />
+    </div>
+
+    <!-- SVG clip-path defining an S-shaped bottom curve -->
+    <svg width="0" height="0" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+      <clipPath id="s-curve-clip" clipPathUnits="objectBoundingBox">
+        <path d="
+M 0 0 L -0.002 0.804 C 0.079 0.748 0.209 0.758 0.362 0.869 C 0.501 0.989 0.75 1.05 1 0.9 L 1 0 Z
+    " />
+      </clipPath>
+    </svg>
+
+    <!-- 2nd row -->
+    <div class="info-row">
+      <div class="info-bar" style="flex:1">
+        <div>Yuqing Appel</div>
+        <div>Software Developer</div>
+        <div style="color:green">iOS & Android Apps</div>
+      </div>
+    </div>
+
+    <!-- 3rd row -->
+    <div class="app-qr-row" style="flex:1">
+      <a href="https://apps.apple.com/us/app/ilpark/id6745150521"><img src="ilpark.png" alt="App Icon" /></a>
+      <a href="https://apps.apple.com/us/app/ilpark/id6745150521"><img src="qrcode.png" alt="QR Code" /></a>
+    </div>
+
+    <!-- 4th row -->
+    <div class="contact-row" style="display: flex; flex-direction: column; gap: 10px; flex: 1;">
+      <div style="width: 100%;">
+        <a href="mailto:chester.ilpark@gmail.com" class="contact-item" aria-label="Email me">
+          <img src="email.png" alt="Email Icon" />
+          <span>chester.ilpark@gmail.com</span>
+        </a>
+      </div>
+      <div style="width: 100%;">
+        <a href="tel:+4105058986" class="contact-item" aria-label="Call Yuqing Appel">
+          <img src="phone.png" alt="Phone Icon" />
+          <span>+1 (410) 505-8986</span>
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+
+</html>
