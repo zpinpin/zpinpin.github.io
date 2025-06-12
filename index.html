@@ -124,21 +124,18 @@
   <div class="card-container">
 
     <!-- 1st row -->
-
-    <!-- 1st row -->
-    <div class="profile-wrapper" style="display: flex; align-items: center; justify-content: space-between;">
+    <div class="profile-wrapper">
       <img src="profile.jpg" alt="Profile Photo" class="profile" />
       <img src="logo.jpg" alt="Logo" class="logo" />
-      <!-- Play button on opposite side of logo -->
-      <button id="play-audio-btn" aria-label="Play Audio" style="margin-left: auto; background: none; border: none; cursor: pointer;">
-        <!-- SVG play icon for better appearance -->
-        <svg width="32" height="32" viewBox="0 0 32 32" fill="#4CAF50">
-          <circle cx="16" cy="16" r="16" fill="#E0F7FA"/>
-          <polygon points="12,9 25,16 12,23" fill="#4CAF50"/>
-        </svg>
-      </button>
     </div>
 
+    <!-- SVG clip-path defining an S-shaped bottom curve -->
+    <svg width="0" height="0" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+      <clipPath id="s-curve-clip" clipPathUnits="objectBoundingBox">
+        <path d="M 0 0 L -0.002 0.804 C 0.079 0.748 0.209 0.758 0.362 0.869 C 0.501 0.989 0.75 1.05 1 0.9 L 1 0 Z" />
+      </clipPath>
+    </svg>
+    
     <!-- 2nd row -->
     <div class="info-row">
       <div class="info-bar" style="flex:1">
@@ -146,6 +143,12 @@
         <div>Software Developer</div>
         <div style="color:green">iOS & Android Apps</div>
       </div>
+       <button id="play-audio-btn" aria-label="Play Audio" style="background: none; border: none; cursor: pointer; margin-left: 16px;">
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="#4CAF50">
+      <circle cx="16" cy="16" r="16" fill="#E0F7FA"/>
+      <polygon points="12,9 25,16 12,23" fill="#4CAF50"/>
+    </svg>
+  </button>
     </div>
 
     <!-- 3rd row -->
