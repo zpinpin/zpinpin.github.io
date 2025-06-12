@@ -99,9 +99,6 @@
       background: #e9ecef;
       font-size: 1em;
     }
-    audio {
-      display:none;
-    }
     .contact-item {
       display: flex;
       align-items: center;
@@ -128,19 +125,19 @@
 
     <!-- 1st row -->
 
-    <div class="profile-wrapper">
+    <!-- 1st row -->
+    <div class="profile-wrapper" style="display: flex; align-items: center; justify-content: space-between;">
       <img src="profile.jpg" alt="Profile Photo" class="profile" />
       <img src="logo.jpg" alt="Logo" class="logo" />
+      <!-- Play button on opposite side of logo -->
+      <button id="play-audio-btn" aria-label="Play Audio" style="margin-left: auto; background: none; border: none; cursor: pointer;">
+        <!-- SVG play icon for better appearance -->
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="#4CAF50">
+          <circle cx="16" cy="16" r="16" fill="#E0F7FA"/>
+          <polygon points="12,9 25,16 12,23" fill="#4CAF50"/>
+        </svg>
+      </button>
     </div>
-
-    <!-- SVG clip-path defining an S-shaped bottom curve -->
-    <svg width="0" height="0" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-      <clipPath id="s-curve-clip" clipPathUnits="objectBoundingBox">
-        <path d="
-M 0 0 L -0.002 0.804 C 0.079 0.748 0.209 0.758 0.362 0.869 C 0.501 0.989 0.75 1.05 1 0.9 L 1 0 Z
-    " />
-      </clipPath>
-    </svg>
 
     <!-- 2nd row -->
     <div class="info-row">
@@ -172,12 +169,36 @@ M 0 0 L -0.002 0.804 C 0.079 0.748 0.209 0.758 0.362 0.869 C 0.501 0.989 0.75 1.
         </a>
       </div>
     </div>
-
+    <audio id="profile-audio" loop>
+      <source src="AllAboutThatApp.mp3" type="audio/mpeg"/>
+      Your browser does not support the audio element.
+    </audio>
   </div>
-<audio autoplay loop>
-  <source src="AllAboutThatApp.mp3" type="audio/mpeg"/>
-  Your browser does not support the audion element.
-</audio>
+  <script>
+    const audio = document.getElementById('profile-audio');
+    const playBtn = document.getElementById('play-audio-btn');
+
+    playBtn.addEventListener('click', function() {
+      if (audio.paused) {
+        audio.play();
+        playBtn.innerHTML = `
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="#4CAF50">
+            <circle cx="16" cy="16" r="16" fill="#E0F7FA"/>
+            <rect x="11" y="9" width="4" height="14" fill="#4CAF50"/>
+            <rect x="17" y="9" width="4" height="14" fill="#4CAF50"/>
+          </svg>
+        `; // Pause icon
+      } else {
+        audio.pause();
+        playBtn.innerHTML = `
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="#4CAF50">
+            <circle cx="16" cy="16" r="16" fill="#E0F7FA"/>
+            <polygon points="12,9 25,16 12,23" fill="#4CAF50"/>
+          </svg>
+        `; // Play icon
+      }
+    });
+  </script>
 </body>
 
 </html>
