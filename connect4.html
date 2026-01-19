@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Connect 4</title>
+    <style>
+        :root {
+            --board-blue: #2b5797;
+            --empty-slot: #ffffff;
+            --red-piece: #ff3e3e;
+            --yellow-piece: #ffdb3a;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+
+        #status {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        #turn-indicator {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            background: white;
+            padding: 10px 25px;
+            border-radius: 50px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            align-items: center;
+        }
+
+        .chip-display {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 4px solid transparent;
+            transition: 0.3s;
+            opacity: 0.3;
+        }
+
+        .chip-display.active {
+            opacity: 1;
+            border-color: #333;
+            transform: scale(1.2);
+        }
+
+        #board {
+            display: grid;
+            grid-template-columns: repeat(7, 95px);
+            grid-template-rows: repeat(6, 95px);
+            gap: 10px;
+            background-color: var(--board-blue);
+            padding: 15px;
+            border-radius: 15px;
+        }
+
+        .slot-circle {
+            width: 90px;
+            height: 90px;
+            background-color: var(--empty-slot);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #333;
+            padding: 8px;
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s, transform 0.1s;
+        }
+
+        .slot-circle:hover { transform: scale(1.05); }
+
+        .slot-circle.red { background-color: var(--red-piece); color: white; transform: scale(1); }
+        .slot-circle.yellow { background-color: var(--yellow-piece); color: #333; transform: scale(1); }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 25px;
+            cursor: pointer;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>复习 听写 Connect 4</h1>
+    <div id="status">红棋, 开始!</div>
+
+    <div id="turn-indicator">
+        <div id="display-red" class="chip-display active" style="background-color: var(--red-piece);"></div>
+        <span>Current Turn</span>
+        <div id="display-yellow" class="chip-display" style="background-color: var(--yellow-piece);"></div>
+    </div>
+    
+    <div id="board"></div>
+    <button onclick="resetGame()">从新开始</button>
+
+    <script>
+        // Large pool of words to draw from
+        const WORD_POOL = [
+"名字","百战百胜","六岁","学校","老师","好啊","拿着","写字","卖了","买些","纸笔",
+"走丢","着急","左脚","背上","蜜","米","牙齿","不慢","生气","刚才","咬过","比较","指点",
+"迷路","千万","要是","自然","太阳","天空","帮忙","树影","永远","认出","黑夜","特别",
+"改变","昨天","清楚","放心","更好","答应","病了","散步","聪明","求您","勇敢","感动"
+                        ];
+        const ROWS = 6; const COLS = 7;
+        let currentPlayer = 'red';
+        let boardState = [];
+        let gameOver = false;
+
+        // Function to shuffle the pool and pick 42 words
+        function getRandomWords() {
+            let shuffled = [...WORD_POOL].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, 42);
+        }
+
+        function initBoard() {
+            const board = document.getElementById('board');
+            board.innerHTML = '';
+            boardState = Array(ROWS).fill().map(() => Array(COLS).fill(null));
+            gameOver = false;
+            
+            const selectedWords = getRandomWords();
+            
+            selectedWords.forEach((word, i) => {
+                const r = Math.floor(i / COLS);
+                const c = i % COLS;
+                const circle = document.createElement('div');
+                circle.classList.add('slot-circle');
+                circle.innerText = word;
+                circle.id = `slot-${r}-${c}`;
+                circle.onclick = () => handleMove(r, c);
+                board.appendChild(circle);
+            });
+            updateTurnDisplay();
+        }
+
+        function handleMove(r, c) {
+            if (gameOver || boardState[r][c]) return;
+
+            boardState[r][c] = currentPlayer;
+            const circle = document.getElementById(`slot-${r}-${c}`);
+            circle.classList.add(currentPlayer);
+
+            if (checkWin(r, c)) {
+                document.getElementById('status').innerText = `🎉 ${currentPlayer.toUpperCase()} WINS!`;
+                gameOver = true;
+                return;
+            }
+
+            currentPlayer = (currentPlayer === 'red') ? 'yellow' : 'red';
+            updateTurnDisplay();
+        }
+
+        function updateTurnDisplay() {
+            if (gameOver) return;
+            document.getElementById('status').innerText = `${currentPlayer.charAt(0).toUpperCase() + currentPlayer.slice(1)}'s turn`;
+            document.getElementById('display-red').classList.toggle('active', currentPlayer === 'red');
+            document.getElementById('display-yellow').classList.toggle('active', currentPlayer === 'yellow');
+        }
+
+        function checkWin(r, c) {
+            const directions = [[0,1], [1,0], [1,1], [1,-1]];
+            for (let [dr, dc] of directions) {
+                let count = 1;
+                // Positive
+                for (let i = 1; i <= 3; i++) {
+                    let nr = r + dr*i, nc = c + dc*i;
+                    if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && boardState[nr][nc] === currentPlayer) count++; else break;
+                }
+                // Negative
+                for (let i = 1; i <= 3; i++) {
+                    let nr = r - dr*i, nc = c - dc*i;
+                    if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && boardState[nr][nc] === currentPlayer) count++; else break;
+                }
+                if (count >= 4) return true;
+            }
+            return false;
+        }
+
+        function resetGame() {
+            currentPlayer = 'red';
+            initBoard();
+        }
+
+        initBoard();
+    </script>
+</body>
+</html>
