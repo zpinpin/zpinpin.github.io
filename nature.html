@@ -1,0 +1,273 @@
+<!DOCTYPE htm要是你在野外迷了路l>
+<html lang="zh-Hans">
+<head>
+    <meta charset="UTF-8" />
+    <title>要是你在野外迷了路- 大自然的指路灯</title>
+    <style>
+        body {
+            /* 野外森林主题：晨雾林间渐变 */
+            background: linear-gradient(135deg, 
+                #4a7c59 0%, 
+                #2d5a3e 30%, 
+                #1a3d2e 60%, 
+                #0f2a20 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #e8f5e8;
+            overflow-x: hidden;
+            font-family: "Microsoft Yahei", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            position: relative;
+        }
+
+        /* 森林晨雾背景图案 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(ellipse 30% 20% at 15% 25%, rgba(255,255,200,0.1) 0%, transparent 50%),
+                radial-gradient(circle 10% at 70% 60%, rgba(173,216,230,0.08) 0%, transparent 50%),
+                linear-gradient(90deg, transparent 48%, rgba(139,195,74,0.03) 50%, transparent 52%);
+            pointer-events: none;
+            z-index: -1;
+            animation: mist 20s ease-in-out infinite alternate;
+        }
+
+        @keyframes mist {
+            0% { opacity: 0.8; }
+            100% { opacity: 1; }
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 1000px;
+            background: linear-gradient(145deg, 
+                rgba(76, 124, 89, 0.9) 0%, 
+                rgba(45, 90, 62, 0.95) 100%);
+            border-radius: 25px;
+            box-shadow: 
+                0 20px 40px rgba(15, 42, 32, 0.6),
+                inset 0 1px 0 rgba(255,255,255,0.3);
+            overflow: hidden;
+            position: relative;
+            border: 3px solid rgba(144, 238, 144, 0.6);
+            backdrop-filter: blur(8px);
+        }
+
+        .game-header {
+            background: linear-gradient(to right, #228b22, #32cd32, #228b22);
+            color: #f0fff0;
+            padding: 25px 30px;
+            text-align: center;
+            position: relative;
+            border-bottom: 3px solid rgba(144, 238, 144, 0.9);
+        }
+
+        .game-header h1 {
+            font-size: 2.4rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+
+        .game-header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            max-width: 700px;
+            margin: 0 auto;
+            color: #e8f5e8;
+        }
+
+        /* 北极星装饰 */
+        .north-star {
+            position: absolute;
+            width: 45px;
+            height: 45px;
+            background: radial-gradient(circle, #b8e6ff 25%, #87cefa 60%, transparent 70%);
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            top: 25px;
+            right: 35px;
+            animation: twinkle 2s ease-in-out infinite alternate;
+            filter: drop-shadow(0 0 8px rgba(184,230,255,0.8));
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.7; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.05); }
+        }
+
+        .main-content {
+            padding: 30px;
+            min-height: 400px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 150 150"><circle cx="25" cy="130" r="3" fill="%2395f985" opacity="0.4"/><circle cx="80" cy="135" r="2" fill="%237cfc00" opacity="0.3"/><circle cx="120" cy="128" r="2.5" fill="%2369c5a0" opacity="0.5"/><path d="M15 140 Q50 145 90 138 Q130 132 140 140" stroke="%2340e0d0" stroke-width="1.5" fill="none" opacity="0.3"/><circle cx="40" cy="110" r="8" fill="none" stroke="%2390ee90" stroke-width="1" opacity="0.2"/></svg>');
+        }
+
+        .story-title {
+            font-size: 1.6rem;
+            margin-bottom: 25px;
+            color: #90ee90;
+            text-align: center;
+            font-weight: bold;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+        }
+
+        .story-section {
+            margin-bottom: 20px;
+            padding: 18px 20px;
+            background: linear-gradient(145deg, rgba(144,238,144,0.6), rgba(124,252,0,0.4));
+            border-radius: 16px;
+            border-left: 5px solid #32cd32;
+            box-shadow: 0 4px 15px rgba(26, 61, 46, 0.4);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .story-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ffff00, #90ee90, #32cd32);
+        }
+
+        .story-section:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(50, 205, 50, 0.3);
+            background: linear-gradient(145deg, rgba(144,238,144,0.8), rgba(124,252,0,0.6));
+        }
+
+        .story-chinese {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            line-height: 1.7;
+            color: #1a3d2e;
+            font-weight: 500;
+        }
+
+        .story-pinyin {
+            font-size: 1rem;
+            color: #0f5132;
+            line-height: 1.6;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        .highlight-nature {
+            color: #228b22;
+            font-weight: bold;
+            background: rgba(144,238,144,0.4);
+            padding: 3px 8px;
+            border-radius: 6px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+            display: inline-block;
+        }
+
+        .highlight-direction {
+            color: #006400;
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+        }
+
+        .footer-note {
+            margin-top: 30px;
+            font-size: 1rem;
+            text-align: center;
+            color: #2e8b57;
+            background: rgba(144,238,144,0.5);
+            padding: 18px;
+            border-radius: 12px;
+            border-left: 5px solid #32cd32;
+            box-shadow: 0 4px 12px rgba(26, 61, 46, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .game-header h1 { font-size: 2rem; }
+            .story-chinese { font-size: 1.1rem; }
+            .story-pinyin { font-size: 0.95rem; }
+            .main-content { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <div class="game-header">
+        <h1>🌲🌞 要是你在野外迷了路</h1>
+        <p>大自然的天然指南针，教你在野外迷路时如何找到正确方向！</p>
+        <div class="north-star"></div>
+    </div>
+
+    <div class="main-content">
+        <div class="story-title">野外导航 Story & Pinyin</div>
+
+        <div class="story-section">
+            <div class="story-chinese">要是你在野外迷了路，可千万别慌张。</div>
+            <div class="story-pinyin">Yàoshì nǐ zài yěwài <span class="highlight-direction">míle lù</span>，kě qiānwàn bié huāngzhāng。</div>
+        </div>
+
+        <div class="story-section">
+            <div class="story-chinese">大自然有很多<span class="highlight-nature">天然的指南针</span>，会告诉你准确的方向。</div>
+            <div class="story-pinyin">Dà zìrán yǒu hěn duō <span class="highlight-nature">tiānrán de zhǐnánzhēn</span>，huì gàosu nǐ zhǔnquè de fāngxiàng。</div>
+        </div>
+
+        <div class="story-section">
+            <div class="story-chinese"><span class="highlight-nature">太阳</span>是个忠实的向导，它在天空给你指引方向：</div>
+            <div class="story-pinyin"><span class="highlight-nature">Tàiyáng</span> shì gè zhōngxīn de xiàngdǎo，tā zài tiānkōng gěi nǐ zhǐyǐn fāngxiàng：</div>
+        </div>
+
+        <div class="story-section">
+            <div class="story-chinese">中午的时候它在<span class="highlight-direction">南边</span>，地上的<span class="highlight-nature">树影</span>正指着<span class="highlight-direction">北方</span>。</div>
+            <div class="story-pinyin">Zhōngwǔ de shíhou tā zài <span class="highlight-direction">nánbiān</span>，dìshàng de <span class="highlight-nature">shùyǐng</span> zhèng zhǐzhe <span class="highlight-direction">běifāng</span>。</div>
+        </div>
+
+        <div class="story-section">
+            <div class="story-chinese">要是碰上阴雨天，<span class="highlight-nature">大树</span>也会来帮忙：</div>
+            <div class="story-pinyin">Yàoshì pèngshàng yīnyǔ tiān，<span class="highlight-nature">dàshù</span> yě huì lái bāngmáng：</div>
+        </div>
+
+        <div class="story-section">
+            <div class="story-chinese"><span class="highlight-nature">枝叶密</span>的一面是<span class="highlight-direction">南</span>，<span class="highlight-nature">枝叶稀</span>的一面是<span class="highlight-direction">北方</span>。</div>
+            <div class="story-pinyin"><span class="highlight-nature">Zhīyè mì</span> de yīmiàn shì <span class="highlight-direction">nán</span>，<span class="highlight-nature">zhīyè xī</span> de yīmiàn shì <span class="highlight-direction">běifāng</span>。</div>
+        </div>
+
+        <div class="story-section">
+            <div class="story-chinese"><span class="highlight-nature">雪</span>特别怕太阳，向<span class="highlight-direction">北</span>的比向<span class="highlight-direction">南</span>的融化的慢。</div>
+            <div class="story-pinyin"><span class="highlight-nature">Xuě</span> tèbié pà tàiyáng，xiàng <span class="highlight-direction">běi</span> de bǐ xiàng <span class="highlight-direction">nán</span> de rónghuà de màn。</div>
+        </div>
+
+        <div class="story-section">
+            <div class="story-chinese">看一看沟里的<span class="highlight-nature">积雪</span>，就知道哪儿是<span class="highlight-direction">北</span>，哪儿是<span class="highlight-direction">南</span>。</div>
+            <div class="story-pinyin">Kàn yì kàn gōulǐ de <span class="highlight-nature">jīxuě</span>，jiù zhīdào nǎr shì <span class="highlight-direction">běi</span>，nǎr shì <span class="highlight-direction">nán</span>。</div>
+        </div>
+
+        <div class="story-section">
+            <div class="story-chinese"><span class="highlight-nature">北极星</span>是盏指路灯，它永远高挂在<span class="highlight-direction">北方</span>，你能认出它，就不会在黑夜里乱闯。</div>
+            <div class="story-pinyin"><span class="highlight-nature">Běijízīng</span> shì zhǎn zhǐlùdēng，tā yǒngyuǎn gāoguà zài <span class="highlight-direction">běifāng</span>，nǐ néng rènchū tā，jiù bùhuì zài hēiyè lǐ luànchuǎng。</div>
+        </div>
+
+        <div class="story-section">
+            <div class="story-chinese">要是你在野外迷了路，可千万别慌张。</div>
+            <div class="story-pinyin">Yàoshì nǐ zài yěwài míle lù，kě qiānwàn bié huāngzhāng。</div>
+        </div>
+
+        <div class="story-section">
+            <div class="story-chinese">大自然有很多<span class="highlight-nature">天然的指南针</span>，只要你细细观察，多多去想。</div>
+            <div class="story-pinyin">Dà zìrán yǒu hěn duō <span class="highlight-nature">tiānrán de zhǐnánzhēn</span>，zhǐyào nǐ xìxì guānchá，duōduō qù xiǎng。</div>
+        </div>
+
+        <div class="footer-note">
+            🌲💡 小提示：记住<span class="highlight-nature">太阳、树影、大树、积雪、北极星</span>等自然指南针，下次野外探险不怕迷路啦！
+        </div>
+    </div>
+</div>
+</body>
+</html>
