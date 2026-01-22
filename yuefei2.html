@@ -1,0 +1,1982 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>岳飞学写字闯关游戏</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #66b2e6 0%, #0092d3 50%, #005b99 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* 游戏容器边框从金黄改成偏沙色白 */
+        .game-container {
+            width: 100%;
+            max-width: 1000px;
+            background-color: rgba(255, 255, 255, 0.06);
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            position: relative;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(10px);
+        }
+
+        /* 顶部：深海蓝渐变 + 金色标题 */
+        .game-header {
+            background: linear-gradient(to right, #0077b6, #005b99);
+            color: #ffe08a;
+            padding: 25px 30px;
+            text-align: center;
+            position: relative;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .game-header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            letter-spacing: 2px;
+        }
+
+        .game-header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto;
+            color: #fff9c4;
+        }
+
+        /* 把“月亮”改成更像海边阳光的色调（只是颜色变） */
+        .moon-decoration {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #fff7d6 30%, #ffd54f 70%);
+            border-radius: 50%;
+            top: 20px;
+            right: 30px;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.7);
+        }
+
+        .main-content {
+            padding: 30px;
+            min-height: 500px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="10" cy="90" r="2" fill="%23f4c97a"/><circle cx="40" cy="85" r="1.5" fill="%23e0b878"/><circle cx="70" cy="92" r="1" fill="%23f4c97a"/><circle cx="30" cy="75" r="2" fill="%23e0b878"/><circle cx="80" cy="88" r="1.5" fill="%23d3a76e"/><circle cx="20" cy="80" r="1" fill="%23f4c97a"/></svg>');
+        }
+
+        /* 地图页面样式 */
+        .map-container {
+            text-align: center;
+        }
+
+        .map-title {
+            font-size: 2.2rem;
+            color: #ffcc00;
+            margin-bottom: 40px;
+            padding-bottom: 15px;
+            border-bottom: 2px dashed #ffcc00;
+            text-shadow: 0 0 5px rgba(255, 204, 0, 0.5);
+        }
+
+        /* 地图：海水到沙滩的渐变 */
+        .map {
+            position: relative;
+            height: 350px;
+            background: linear-gradient(to bottom, rgba(0, 160, 233, 0.9) 0%, rgba(0, 119, 190, 0.95) 55%, rgba(249, 216, 127, 0.95) 100%);
+            border-radius: 20px;
+            margin: 0 auto 40px;
+            overflow: hidden;
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .path {
+            position: absolute;
+            width: 85%;
+            height: 12px;
+            background: linear-gradient(to right, #fff59d, #fff176);
+            top: 50%;
+            left: 7.5%;
+            transform: translateY(-50%);
+            border-radius: 6px;
+            box-shadow: 0 0 10px rgba(255, 235, 158, 0.6);
+        }
+
+        .levels-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 90%;
+            position: relative;
+            z-index: 2;
+        }
+
+        .level-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 28%;
+        }
+
+        .level-point {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .level-point:hover {
+            transform: scale(1.15);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
+        }
+
+        .level-point.locked {
+            background: #555 !important;
+            cursor: not-allowed;
+            filter: grayscale(0.8);
+        }
+
+        .level-point.locked:hover {
+            transform: scale(1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .level-1 {
+            background: radial-gradient(circle, #ff9900, #cc6600);
+        }
+
+        .level-2 {
+            background: radial-gradient(circle, #ffcc00, #ff9900);
+        }
+
+        .level-3 {
+            background: radial-gradient(circle, #ff6600, #cc3300);
+        }
+
+        .level-label {
+            font-weight: bold;
+            color: #ffcc00;
+            font-size: 1.4rem;
+            text-shadow: 0 0 5px rgba(255, 204, 0, 0.5);
+            text-align: center;
+            margin-top: 5px;
+            background-color: rgba(44, 11, 54, 0.7);
+            padding: 8px 15px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 204, 0, 0.3);
+            width: 100%;
+        }
+
+        .level-description {
+            color: #ffd966;
+            font-size: 1rem;
+            margin-top: 8px;
+            opacity: 0.9;
+        }
+
+        .instructions {
+            background-color: rgba(74, 35, 90, 0.5);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            border-left: 5px solid #ffcc00;
+            color: #ffd966;
+        }
+
+        .instructions i {
+            color: #ffcc00;
+            margin-right: 10px;
+        }
+
+        /* 游戏关卡通用样式 */
+        .game-level {
+            display: none;
+        }
+
+        .level-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 204, 0, 0.3);
+        }
+
+        .level-title {
+            font-size: 2rem;
+            color: #ffcc00;
+            text-shadow: 0 0 5px rgba(255, 204, 0, 0.5);
+        }
+
+        .level-progress {
+            font-size: 1.3rem;
+            color: #ffcc00;
+            font-weight: bold;
+            background-color: rgba(74, 35, 90, 0.5);
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 204, 0, 0.3);
+        }
+
+        /* 单题容器 */
+        .question-container {
+            background-color: rgba(44, 11, 54, 0.7);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            margin-bottom: 30px;
+            min-height: 350px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border: 2px solid rgba(255, 204, 0, 0.2);
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .question-title {
+            font-size: 1.8rem;
+            color: #ffcc00;
+        }
+
+        .question-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .question-text {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            color: #fff;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        /* 第一关专用拼音字体 */
+        .pinyin-text {
+            font-family: "Arial", sans-serif;
+            font-size: 1.6rem;
+            letter-spacing: 1px;
+        }
+
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            width: 100%;
+            max-width: 700px;
+        }
+
+        .option {
+            padding: 20px 25px;
+            background-color: rgba(74, 35, 90, 0.7);
+            border: 3px solid rgba(255, 204, 0, 0.3);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1.4rem;
+            text-align: center;
+            font-weight: 500;
+            color: #fff;
+        }
+
+        .option:hover {
+            background-color: rgba(102, 51, 153, 0.8);
+            border-color: #ffcc00;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(255, 204, 0, 0.3);
+        }
+
+        .option.selected {
+            background-color: rgba(255, 204, 0, 0.2);
+            border-color: #ffcc00;
+            color: #ffcc00;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(255, 204, 0, 0.5);
+        }
+
+        .option.correct {
+            background-color: rgba(0, 200, 0, 0.3);
+            border-color: #00cc00;
+            color: #ccffcc;
+        }
+
+        .option.wrong {
+            background-color: rgba(200, 0, 0, 0.3);
+            border-color: #ff3333;
+            color: #ffcccc;
+        }
+
+        /* 第二关图片样式 */
+        .image-display {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .image-container {
+            width: 280px;
+            height: 280px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 3px solid rgba(255, 204, 0, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .scene-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .scene-element {
+            position: absolute;
+        }
+
+        /* 圆的图片 - 空心的圆 */
+        .empty-circle {
+            width: 120px;
+            height: 120px;
+            border: 5px solid #ffcc00;
+            border-radius: 50%;
+            background-color: transparent;
+        }
+
+        /* 亮图片 - 发光的圆 */
+        .bright-circle {
+            width: 140px;
+            height: 140px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .glowing-circle {
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, #FFFDE7 0%, #FFF9C4 20%, #FFEE58 60%, #FFD54F 100%);
+            border-radius: 50%;
+            box-shadow:
+                0 0 60px rgba(255, 255, 255, 0.9),
+                0 0 100px rgba(255, 255, 255, 0.6),
+                0 0 140px rgba(255, 255, 255, 0.3),
+                inset 0 0 20px rgba(255, 255, 255, 0.9);
+            animation: glowPulse 2s infinite alternate;
+            z-index: 2;
+        }
+
+        @keyframes glowPulse {
+            from {
+                box-shadow:
+                    0 0 50px rgba(255, 255, 255, 0.8),
+                    0 0 80px rgba(255, 255, 255, 0.5),
+                    0 0 120px rgba(255, 255, 255, 0.2),
+                    inset 0 0 15px rgba(255, 255, 255, 0.8);
+            }
+
+            to {
+                box-shadow:
+                    0 0 70px rgba(255, 255, 255, 1),
+                    0 0 120px rgba(255, 255, 255, 0.7),
+                    0 0 160px rgba(255, 255, 255, 0.4),
+                    inset 0 0 25px rgba(255, 255, 255, 1);
+            }
+        }
+
+        /* 图片通用样式 */
+        .question-image {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 10px;
+            object-fit: contain;
+        }
+
+        .buttons-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 15px 35px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, #ff9900, #cc6600);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(to right, #4a235a, #2c0b36);
+            color: #ffcc00;
+            border: 2px solid #ffcc00;
+        }
+
+        .btn-success {
+            background: linear-gradient(to right, #ff6600, #cc3300);
+            color: white;
+        }
+
+        .btn:disabled {
+            background-color: #666;
+            color: #999;
+            cursor: not-allowed;
+            transform: none;
+            border: none;
+        }
+
+        .btn:hover:not(:disabled) {
+            opacity: 0.9;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .feedback-container {
+            text-align: center;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .feedback-correct {
+            background-color: rgba(0, 200, 0, 0.2);
+            border: 2px solid #00cc00;
+            color: #ccffcc;
+        }
+
+        .feedback-wrong {
+            background-color: rgba(200, 0, 0, 0.2);
+            border: 2px solid #ff3333;
+            color: #ffcccc;
+        }
+
+        .feedback-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .feedback-text {
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        /* 拼音字体统一 */
+        .pinyin-feedback {
+            font-family: "Arial", sans-serif;
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-small {
+            padding: 10px 20px;
+            font-size: 1rem;
+        }
+
+        /* 关卡完成提示 */
+        .level-complete-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.5s;
+        }
+
+        .level-complete-content {
+            background: linear-gradient(135deg, #4a235a, #2c0b36);
+            padding: 40px;
+            border-radius: 25px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            border: 3px solid #ffcc00;
+            box-shadow: 0 0 30px rgba(255, 204, 0, 0.5);
+            animation: scaleIn 0.5s;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .complete-icon {
+            font-size: 5rem;
+            color: #ffcc00;
+            margin-bottom: 20px;
+            animation: bounce 1s infinite alternate;
+        }
+
+        @keyframes bounce {
+            from {
+                transform: translateY(0);
+            }
+
+            to {
+                transform: translateY(-15px);
+            }
+        }
+
+        .complete-title {
+            font-size: 2.5rem;
+            color: #ffcc00;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+        }
+
+        .complete-message {
+            font-size: 1.4rem;
+            color: #ffd966;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        /* 结果页面样式 */
+        .result-container {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .result-icon {
+            font-size: 6rem;
+            margin-bottom: 20px;
+            color: #ffcc00;
+            text-shadow: 0 0 20px rgba(255, 204, 0, 0.7);
+        }
+
+        .result-title {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #ffcc00;
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+        }
+
+        .result-details {
+            background-color: rgba(44, 11, 54, 0.7);
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 500px;
+            margin: 20px auto;
+            text-align: left;
+            border: 2px solid rgba(255, 204, 0, 0.2);
+        }
+
+        .result-details h3 {
+            color: #ffcc00;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255, 204, 0, 0.3);
+        }
+
+        .result-summary {
+            color: #ffd966;
+            font-size: 1.2rem;
+            margin-bottom: 25px;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .learned-item {
+            background-color: rgba(255, 204, 0, 0.1);
+            border-left: 4px solid #ffcc00;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        .learned-title {
+            color: #ffcc00;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .learned-words {
+            color: #fff;
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .highlight-word {
+            color: #ffcc00;
+            font-weight: bold;
+            font-size: 1.4rem;
+        }
+
+        .learned-pinyin {
+            font-family: "Arial", sans-serif;
+            color: #ffd966;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .learned-example {
+            color: #ffd966;
+            font-size: 1.1rem;
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+
+        .example-sentence {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 8px 12px;
+            border-radius: 5px;
+            margin-top: 5px;
+            border-left: 3px solid rgba(255, 204, 0, 0.5);
+        }
+
+        .example-word {
+            color: #ffcc00;
+            font-weight: bold;
+        }
+
+        /* 灯笼装饰 */
+        .lantern {
+            position: absolute;
+            width: 40px;
+            height: 60px;
+            background: radial-gradient(ellipse, #ff3333, #cc0000);
+            border-radius: 20px;
+            top: 10px;
+            left: 20px;
+            box-shadow: 0 0 15px rgba(255, 51, 51, 0.7);
+            animation: swing 3s infinite alternate;
+        }
+
+        .lantern:after {
+            content: '';
+            position: absolute;
+            width: 5px;
+            height: 15px;
+            background: #ff9900;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .lantern.right {
+            left: auto;
+            right: 20px;
+            animation-delay: 1s;
+        }
+
+        @keyframes swing {
+            0% {
+                transform: rotate(-5deg);
+            }
+
+            100% {
+                transform: rotate(5deg);
+            }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .options-container {
+                grid-template-columns: 1fr;
+            }
+
+            .game-header h1 {
+                font-size: 2rem;
+            }
+
+            .question-text {
+                font-size: 1.6rem;
+            }
+
+            .option {
+                font-size: 1.2rem;
+                padding: 15px;
+            }
+
+            .buttons-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .control-buttons {
+                flex-direction: column;
+            }
+
+            .levels-container {
+                flex-direction: column;
+                height: 100%;
+                justify-content: space-around;
+            }
+
+            .level-item {
+                width: 100%;
+                margin-bottom: 30px;
+            }
+
+            .path {
+                width: 12px;
+                height: 85%;
+                left: 50%;
+                top: 7.5%;
+                transform: translateX(-50%);
+            }
+
+            .map {
+                height: 500px;
+            }
+
+            .image-container {
+                width: 250px;
+                height: 250px;
+            }
+
+            .empty-circle {
+                width: 100px;
+                height: 100px;
+            }
+
+            .bright-circle {
+                width: 120px;
+                height: 120px;
+            }
+
+            .glowing-circle {
+                width: 100px;
+                height: 100px;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- 关卡完成提示层 -->
+    <div class="level-complete-overlay" id="level-complete-overlay">
+        <div class="level-complete-content">
+            <div class="complete-icon" id="complete-icon">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <h2 class="complete-title" id="complete-title">恭喜完成第一关！</h2>
+            <p class="complete-message" id="complete-message">您已成功掌握本周词语的正确拼音！可以进入下一关了！</p>
+            <button class="btn btn-success" id="continue-button">
+                <i class="fas fa-arrow-right"></i> 继续下一关
+            </button>
+        </div>
+    </div>
+
+    <div class="game-container">
+        <!-- 灯笼装饰 -->
+        <div class="lantern"></div>
+        <div class="lantern right"></div>
+
+        <div class="game-header">
+            <h1>岳飞学写字闯关游戏</h1>
+            <p>通过三关挑战，掌握岳飞相关生词：拼音匹配、读句子选正确意思和选词填空</p>
+            <div class="moon-decoration"></div>
+        </div>
+
+        <div class="main-content">
+            <!-- 地图页面 -->
+            <div id="map-page" class="map-container">
+                <h2 class="map-title">岳飞闯关地图</h2>
+                <div class="map">
+                    <div class="path"></div>
+                    <div class="levels-container">
+                        <div class="level-item">
+                            <div class="level-point level-1" data-level="1">
+                                <i class="fas fa-language"></i>
+                            </div>
+                            <div class="level-label">拼音匹配</div>
+                            <div class="level-description">匹配词语与正确拼音</div>
+                        </div>
+
+                        <div class="level-item">
+                            <div class="level-point level-2 locked" data-level="2">
+                                <i class="fas fa-images"></i>
+                            </div>
+                            <div class="level-label">读句子</div>
+                            <div class="level-description">读句子选正确意思</div>
+                        </div>
+
+                        <div class="level-item">
+                            <div class="level-point level-3 locked" data-level="3">
+                                <i class="fas fa-edit"></i>
+                            </div>
+                            <div class="level-label">选词填空</div>
+                            <div class="level-description">选择合适的词语填空</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="instructions">
+                    <p><i class="fas fa-info-circle"></i> 游戏说明：点击关卡图标开始挑战。每个关卡有几道题目，完成当前关卡才能解锁下一关。让我们一起学得像岳飞那样，越飞越高！</p>
+                </div>
+            </div>
+
+            <!-- 第一关：拼音匹配 -->
+            <div id="level-1" class="game-level">
+                <div class="level-header">
+                    <h2 class="level-title">第一关：生词和拼音匹配</h2>
+                    <div class="level-progress">题目: <span id="level1-progress">1/15</span></div>
+                </div>
+
+                <div class="question-container">
+                    <div class="question-header">
+                        <div class="question-title" id="level1-question-title">词语：<span id="current-word">传说</span>
+                        </div>
+                    </div>
+
+                    <div class="question-content">
+                        <div class="question-text">请选择正确的拼音：</div>
+                        <div class="options-container" id="level1-options">
+                            <!-- 选项会通过JavaScript动态生成 -->
+                        </div>
+
+                        <div class="feedback-container" id="level1-feedback">
+                            <!-- 反馈会通过JavaScript动态生成 -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="buttons-container">
+                    <button class="btn btn-secondary" id="back-to-map-1">
+                        <i class="fas fa-map"></i> 返回地图
+                    </button>
+                    <div class="control-buttons">
+                        <button class="btn btn-secondary btn-small" id="prev-level1" disabled>
+                            <i class="fas fa-arrow-left"></i> 上一题
+                        </button>
+                        <button class="btn btn-secondary btn-small" id="reset-level1" disabled>
+                            <i class="fas fa-redo"></i> 重新选择
+                        </button>
+                        <button class="btn btn-primary" id="next-level1" disabled>
+                            下一题 <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第二关：读句子选正确意思（岳飞，不用图片） -->
+            <div id="level-2" class="game-level">
+                <div class="level-header">
+                    <h2 class="level-title">第二关：读句子选正确意思（岳飞）</h2>
+                    <div class="level-progress">题目: <span id="level2-progress">1/4</span></div>
+                </div>
+
+                <div class="question-container">
+                    <div class="question-header">
+                        <div class="question-title" id="level2-question-title">
+                            第 <span id="current-question-num">1</span> 题
+                        </div>
+                    </div>
+
+                    <div class="question-content">
+                        <!-- 提示文字改成“看句子选答案” -->
+                        <div class="question-text">
+                            请读一读下面的句子，选择合适的答案：
+                        </div>
+
+                        <!-- 原来放图片的容器，保留 id，让 JS 用它来放句子 -->
+                        <div class="image-display" id="level2-image-display">
+                            <!-- 句子会通过 JavaScript 动态生成 -->
+                        </div>
+
+                        <!-- 选项区域，保持不变 -->
+                        <div class="options-container" id="level2-options">
+                            <!-- 选项会通过 JavaScript 动态生成 -->
+                        </div>
+
+                        <!-- 反馈区域，保持不变 -->
+                        <div class="feedback-container" id="level2-feedback">
+                            <!-- 反馈会通过 JavaScript 动态生成 -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="buttons-container">
+                    <button class="btn btn-secondary" id="back-to-map-2">
+                        <i class="fas fa-map"></i> 返回地图
+                    </button>
+                    <div class="control-buttons">
+                        <button class="btn btn-secondary btn-small" id="prev-level2" disabled>
+                            <i class="fas fa-arrow-left"></i> 上一题
+                        </button>
+                        <button class="btn btn-secondary btn-small" id="reset-level2" disabled>
+                            <i class="fas fa-redo"></i> 重新选择
+                        </button>
+                        <button class="btn btn-primary" id="next-level2" disabled>
+                            下一题 <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- 第三关：选词填空 -->
+            <div id="level-3" class="game-level">
+                <div class="level-header">
+                    <h2 class="level-title">第三关：选词填空</h2>
+                    <div class="level-progress">题目: <span id="level3-progress">1/13</span></div>
+                </div>
+
+                <div class="question-container">
+                    <div class="question-header">
+                        <div class="question-title" id="level3-question-title">选词填空</div>
+                    </div>
+
+                    <div class="question-content">
+                        <div class="question-text" id="level3-sentence">你看，今晚的月亮又大又_____。</div>
+
+                        <div class="options-container" id="level3-options">
+                            <!-- 选项会通过JavaScript动态生成 -->
+                        </div>
+
+                        <div class="feedback-container" id="level3-feedback">
+                            <!-- 反馈会通过JavaScript动态生成 -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="buttons-container">
+                    <button class="btn btn-secondary" id="back-to-map-3">
+                        <i class="fas fa-map"></i> 返回地图
+                    </button>
+                    <div class="control-buttons">
+                        <button class="btn btn-secondary btn-small" id="prev-level3" disabled>
+                            <i class="fas fa-arrow-left"></i> 上一题
+                        </button>
+                        <button class="btn btn-secondary btn-small" id="reset-level3" disabled>
+                            <i class="fas fa-redo"></i> 重新选择
+                        </button>
+                        <button class="btn btn-primary" id="next-level3" disabled>
+                            下一题 <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 结果页面 -->
+            <div id="result-page" class="game-level result-container">
+                <div class="result-icon">
+                    <i class="fas fa-flag"></i>
+                </div>
+                <h2 class="result-title" id="result-title">恭喜完成所有关卡！</h2>
+                <div class="result-details">
+                    <h3>学习成果总结</h3>
+                    <p class="result-summary">通过三关挑战，您已经认识和理解了岳飞相关的生词和知识：</p>
+                    <!-- 第一关：生词和拼音匹配（词汇） -->
+                    <div class="learned-item">
+                        <div class="learned-title">第一关 - 生词和拼音匹配</div>
+                        <div class="learned-words">我们学会了十五个常用词语的正确拼音：</div>
+                        <div class="learned-pinyin">• <span class="highlight-word">全部</span> (quánbù)</div>
+                        <div class="learned-pinyin">• <span class="highlight-word">交给</span> (jiāogěi)</div>
+                        <div class="learned-pinyin">• <span class="highlight-word">难道</span> (nándào)</div>
+                        <div class="learned-pinyin">• <span class="highlight-word">忘了</span> (wàngle)</div>
+                        <div class="learned-pinyin">• <span class="highlight-word">立刻</span> (lìkè)</div>
+                        <div class="learned-pinyin">• <span class="highlight-word">明白</span> (míngbai)</div>
+                        <div class="learned-pinyin">• <span class="highlight-word">从此</span> (cóngcǐ)</div>
+                        <div class="learned-pinyin">• <span class="highlight-word">铺在</span> (pūzài)</div>
+                        <div class="learned-pinyin">• <span class="highlight-word">当作</span> (dāngzuò)</div>
+                        <div class="learned-pinyin">• <span class="highlight-word">每天</span> (měitiān)</div>
+                        <div class="learned-pinyin">• <span class="highlight-word">不但</span> (búdàn)</div>
+                        <div class="learned-pinyin">• <span class="highlight-word">而且</span> (érqiě)</div>
+                        <div class="learned-pinyin">• <span class="highlight-word">历史</span> (lìshǐ)</div>
+                        <div class="learned-pinyin">• <span class="highlight-word">了不起</span> (liǎobuqǐ)</div>
+                        <div class="learned-pinyin">• <span class="highlight-word">诗人</span> (shīrén)</div>
+                    </div>
+
+                    <!-- 第二关：岳飞小问答（阅读理解） -->
+                    <div class="learned-item">
+                        <div class="learned-title">第二关 - 岳飞小问答</div>
+                        <div class="learned-words">我们通过回答问题，理解了岳飞学写字的故事：</div>
+                        <div class="learned-example">• 岳飞没有买纸和笔，而是拿回了<span class="highlight-word">沙和树枝</span></div>
+                        <div class="learned-example">• 用<span class="highlight-word">树枝在沙上写字</span>代替纸和笔</div>
+                        <div class="learned-example">• 岳飞小时候家里穷，但他<span class="highlight-word">坚持学习，刻苦练字</span></div>
+                        <div class="learned-example">• 我们要向岳飞学习，<span class="highlight-word">遇到困难也不要放弃，坚持努力</span></div>
+                    </div>
+
+                    <!-- 第三关：课文填空（岳飞学写字） -->
+                    <div class="learned-item">
+                        <div class="learned-title">第三关 - 根据课文内容填空</div>
+                        <div class="learned-words">我们通过填空，加深了对岳飞学写字故事的理解：</div>
+                        <div class="example-sentence">• 岳飞是中国一位<span class="example-word">百战百胜的将军</span>。</div>
+                        <div class="example-sentence">• 小时候家中贫穷，由<span class="example-word">母亲</span>养活他。</div>
+                        <div class="example-sentence">• 没有纸笔时，他用<span class="example-word">沙和树枝</span>练字。</div>
+                        <div class="example-sentence">• 岳飞长大后，成为一位<span class="example-word">勇敢的将军和了不起的诗人</span>。</div>
+                    </div>
+
+                    <p style="margin-top: 25px; text-align: center; color: #ffd966; font-size: 1.3rem;">
+                        愿你像岳飞一样，爱国、刻苦、又有担当！<i class="fas fa-heart" style="color:#ff3333; margin-left:8px;"></i>
+                    </p>
+                </div>
+                <button class="btn btn-success" id="restart-game">
+                    <i class="fas fa-redo"></i> 重新开始游戏
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // 游戏数据和状态
+        const gameData = {
+            currentLevel: 1,
+            levelCompleted: [false, false, false],
+
+            // 第一关：生词和拼音匹配（岳飞）
+            level1: {
+                title: "生词和拼音匹配（岳飞）",
+                questions: [
+                    { word: "全部", pinyin: "quánbù", options: ["quánbù", "quǎnbù", "quánbú", "quǎnbú"] },
+                    { word: "交给", pinyin: "jiāogěi", options: ["jiāogěi", "jiáogěi", "jiāogéi", "jiǎogěi"] },
+                    { word: "难道", pinyin: "nándào", options: ["nándào", "nándao", "nǎndào", "nàndào"] },
+                    { word: "忘了", pinyin: "wàngle", options: ["wàngle", "wángle", "wàngliè", "wǎngle"] },
+                    { word: "立刻", pinyin: "lìkè", options: ["lìkè", "líkè", "lìké", "lǐkè"] },
+                    { word: "明白", pinyin: "míngbai", options: ["míngbai", "míngbái", "mīngbai", "míngbei"] },
+                    { word: "从此", pinyin: "cóngcǐ", options: ["cóngcǐ", "cóngcí", "cōngcǐ", "cóngchǐ"] },
+                    { word: "铺在", pinyin: "pūzài", options: ["pūzài", "pǔzài", "púzài", "pūzhài"] },
+                    { word: "当作", pinyin: "dāngzuò", options: ["dàngzuò", "dāngzuò", "dàngzuó", "dǎngzuò"] },
+                    { word: "每天", pinyin: "měitiān", options: ["měitiān", "mèitiān", "měitān", "màitiān"] },
+                    { word: "不但", pinyin: "búdàn", options: ["búdàn", "bùdàn", "búdān", "bǔdàn"] },
+                    { word: "而且", pinyin: "érqiě", options: ["érqiě", "érqie", "ěrqiě", "érqié"] },
+                    { word: "历史", pinyin: "lìshǐ", options: ["lìshǐ", "lǐshǐ", "lìshi", "lǐshi"] },
+                    { word: "了不起", pinyin: "liǎobuqǐ", options: ["liǎobuqǐ", "lebuqǐ", "liǎobuqi", "liǎoqǐ"] },
+                    { word: "诗人", pinyin: "shīrén", options: ["shīrén", "shírén", "shǐrén", "shīren"] }
+                ],
+                currentQuestionIndex: 0,
+                userAnswers: [null, null, null, null]
+            },
+
+            // 第二关：读句子选正确意思（岳飞，句子形式，不用图片）
+            level2: {
+                title: "岳飞小问答（更新）",
+                questions: [
+                    {
+                        sentence:
+                            "岳飞没有买纸和笔，他拿回来什么？请同学们想想，岳飞拿回家的这些东西有什么用？簸箕是什么东西？岳飞为什么没有买纸和笔？卖布的钱呢？",
+                        correctAnswer: "原来岳飞拿回家的是沙和树枝",
+                        options: [
+                            "原来岳飞拿回家的是沙和树枝",
+                            "他买了很多纸",
+                            "他拿了石头和水",
+                            "他空手回家了"
+                        ]
+                    },
+                    {
+                        sentence:
+                            "原来岳飞的纸和笔就是沙和树枝。沙和树枝怎么写字？同学们有在沙滩上玩的经验吗？",
+                        correctAnswer: "用树枝在沙上写字",
+                        options: [
+                            "用树枝在沙上写字",
+                            "用笔在空气中写字",
+                            "用水写在布上",
+                            "不用写字"
+                        ]
+                    },
+                    {
+                        sentence:
+                            "岳飞小时候虽然家境贫困，但他坚持学习、刻苦练字。你觉得我们可以从岳飞身上学到什么？",
+                        correctAnswer: "遇到困难也不要放弃，坚持努力",
+                        options: [
+                            "遇到困难也不要放弃，坚持努力",
+                            "努力没用，就放弃",
+                            "只要有钱就能成功",
+                            "别人帮我学就行"
+                        ]
+                    },
+                    {
+                        sentence:
+                            "岳飞不仅是个将军，而且还是个诗人。同学们今天的学习条件可是比岳飞好太多了，你们有没有像岳飞一样努力呢？",
+                        correctAnswer: "要向岳飞学习，努力读书",
+                        options: [
+                            "要向岳飞学习，努力读书",
+                            "学习太难就放弃",
+                            "只玩不学习",
+                            "只练武术不读书"
+                        ]
+                    }
+                ],
+                currentQuestionIndex: 0,
+                userAnswers: [null, null, null]
+            },
+            // 第三关：岳飞小问答
+            level3: {
+                title: "岳飞小问答",
+                questions: [
+                    {
+                        sentence: "800多年以前，中国有一位_____的将军，他的名字叫岳飞。",
+                        correctAnswer: "百战百胜",
+                        options: ["百战百胜", "有名", "年轻", "快乐"]
+                    },
+                    {
+                        sentence: "岳飞很小的时候，父亲就死了，他家里很穷，是_____养活他的。",
+                        correctAnswer: "母亲",
+                        options: ["母亲", "爷爷", "老师", "叔叔"]
+                    },
+                    {
+                        sentence: "岳飞六岁时知道家里没有钱上学，就对母亲说：“妈妈，让您来_____，教我读书写字，好不好？”",
+                        correctAnswer: "当我的老师",
+                        options: ["当我的老师", "买纸和笔", "带我出去玩", "给我讲故事"]
+                    },
+                    {
+                        sentence: "母亲高兴地说：“好！”可是家里没有_____，怎么办呢？",
+                        correctAnswer: "纸和笔",
+                        options: ["纸和笔", "钱", "书和桌子", "老师"]
+                    },
+                    {
+                        sentence: "母亲拿着新织成的布，对岳飞说：孩子，你到街上去把这布卖了，再买些_____回家来。",
+                        correctAnswer: "纸和笔",
+                        options: ["纸和笔", "衣服", "玩具", "米和菜"]
+                    },
+                    {
+                        sentence: "岳飞到了街上，把布卖了，却没有去买纸和笔。他跑到_____，装了满满一簸箕的沙。",
+                        correctAnswer: "大江边",
+                        options: ["大江边", "学校", "树林", "山上"]
+                    },
+                    {
+                        sentence: "岳飞又找了几根树枝，插在沙上面，然后双手捧着簸箕，_____地回家了。",
+                        correctAnswer: "高高兴兴",
+                        options: ["高高兴兴", "慢慢", "伤心", "着急"]
+                    },
+                    {
+                        sentence: "岳飞把簸箕放在门口，把卖布的钱_____交给了母亲。",
+                        correctAnswer: "全部",
+                        options: ["全部", "一半", "一点", "偷偷"]
+                    },
+                    {
+                        sentence: "母亲奇怪地问：“我不是让你去买纸和笔吗？难道你_____？”",
+                        correctAnswer: "忘了",
+                        options: ["忘了", "买了", "记得", "没听到"]
+                    },
+                    {
+                        sentence: "岳飞说：“妈妈您来看，我的纸和笔都有了。”妈妈看到簸箕里的沙和树枝，立刻_____了。",
+                        correctAnswer: "明白",
+                        options: ["明白", "生气", "怀疑", "笑了"]
+                    },
+                    {
+                        sentence: "从此，她就把沙铺在地上当作_____，用树枝当作笔。",
+                        correctAnswer: "纸",
+                        options: ["纸", "布", "本子", "地"]
+                    },
+                    {
+                        sentence: "母亲每天教岳飞练字。岳飞长大以后，成了一位勇敢的____。",
+                        correctAnswer: "将军",
+                        options: ["将军", "老师", "农民", "医生"]
+                    },
+                    {
+                        sentence: "岳飞不仅是一个将军，还是中国历史上很_____的诗人。",
+                        correctAnswer: "了不起",
+                        options: ["了不起", "平凡", "害羞", "安静"]
+                    }],
+                currentQuestionIndex: 0,
+                userAnswers: [null, null, null, null]
+            }
+        };
+
+
+        // DOM元素
+        const mapPage = document.getElementById('map-page');
+        const level1Page = document.getElementById('level-1');
+        const level2Page = document.getElementById('level-2');
+        const level3Page = document.getElementById('level-3');
+        const resultPage = document.getElementById('result-page');
+        const levelPoints = document.querySelectorAll('.level-point');
+        const levelCompleteOverlay = document.getElementById('level-complete-overlay');
+        const completeTitle = document.getElementById('complete-title');
+        const completeMessage = document.getElementById('complete-message');
+        const completeIcon = document.getElementById('complete-icon');
+        const continueButton = document.getElementById('continue-button');
+
+        // 检查是否已回答最少4题
+        function hasAnsweredMinimum(level, minRequired = 4) {
+            const answeredCount = level.userAnswers.filter(a => a !== null).length;
+            return answeredCount >= minRequired;
+        }
+
+        // 音效函数
+        function playCorrectSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime);
+                oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1);
+                oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2);
+
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+            } catch (e) {
+                console.log("音频播放失败，可能浏览器不支持");
+            }
+        }
+
+        function playWrongSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.frequency.setValueAtTime(392.00, audioContext.currentTime);
+                oscillator.frequency.setValueAtTime(349.23, audioContext.currentTime + 0.1);
+                oscillator.frequency.setValueAtTime(311.13, audioContext.currentTime + 0.2);
+
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+            } catch (e) {
+                console.log("音频播放失败，可能浏览器不支持");
+            }
+        }
+
+        function playCompleteSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime);
+                oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1);
+                oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2);
+                oscillator.frequency.setValueAtTime(1046.50, audioContext.currentTime + 0.3);
+
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.8);
+            } catch (e) {
+                console.log("音频播放失败，可能浏览器不支持");
+            }
+        }
+
+        // 初始化游戏
+        function initGame() {
+            updateLevelUnlock();
+            setupEventListeners();
+        }
+
+        // 更新关卡解锁状态
+        function updateLevelUnlock() {
+            levelPoints.forEach((point, index) => {
+                if (index === 0 || gameData.levelCompleted[index - 1]) {
+                    point.classList.remove('locked');
+                } else {
+                    point.classList.add('locked');
+                }
+            });
+        }
+
+        // 显示第一关题目
+        function showLevel1Question() {
+            const level = gameData.level1;
+            const currentIndex = level.currentQuestionIndex;
+            const question = level.questions[currentIndex];
+
+            document.getElementById('current-word').textContent = question.word;
+            document.getElementById('level1-progress').textContent = `${currentIndex + 1}/15`;
+
+            const optionsContainer = document.getElementById('level1-options');
+            optionsContainer.innerHTML = '';
+
+            const shuffledOptions = [...question.options].sort(() => Math.random() - 0.5);
+
+            shuffledOptions.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option pinyin-text';
+                optionElement.textContent = option;
+                optionElement.dataset.answer = option;
+
+                if (level.userAnswers[currentIndex] === option) {
+                    optionElement.classList.add('selected');
+                }
+
+                optionElement.addEventListener('click', handleLevel1OptionClick);
+                optionsContainer.appendChild(optionElement);
+            });
+
+            const feedback = document.getElementById('level1-feedback');
+            feedback.style.display = 'none';
+            feedback.className = 'feedback-container';
+
+            updateLevel1Buttons();
+        }
+
+        // 处理第一关选项点击
+        function handleLevel1OptionClick() {
+            const options = document.querySelectorAll('#level1-options .option');
+            options.forEach(option => {
+                option.classList.remove('selected');
+            });
+
+            this.classList.add('selected');
+
+            const answer = this.dataset.answer;
+            const currentIndex = gameData.level1.currentQuestionIndex;
+            gameData.level1.userAnswers[currentIndex] = answer;
+
+            checkLevel1Answer(answer);
+        }
+
+        // 检查第一关答案
+        function checkLevel1Answer(userAnswer) {
+            const level = gameData.level1;
+            const currentIndex = level.currentQuestionIndex;
+            const question = level.questions[currentIndex];
+            const options = document.querySelectorAll('#level1-options .option');
+
+            const feedback = document.getElementById('level1-feedback');
+
+            if (userAnswer === question.pinyin) {
+                options.forEach(option => {
+                    if (option.dataset.answer === userAnswer) {
+                        option.classList.add('correct');
+                    }
+                });
+
+                feedback.innerHTML = `
+                    <div class="feedback-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="feedback-text">回答正确！</div>
+                    <div class="pinyin-feedback">${question.word} 的拼音是 <span class="pinyin-text">${question.pinyin}</span></div>
+                `;
+                feedback.className = 'feedback-container feedback-correct';
+                feedback.style.display = 'block';
+
+                playCorrectSound();
+            } else {
+                options.forEach(option => {
+                    if (option.dataset.answer === userAnswer) {
+                        option.classList.add('wrong');
+                    }
+                    if (option.dataset.answer === question.pinyin) {
+                        option.classList.add('correct');
+                    }
+                });
+
+                feedback.innerHTML = `
+                    <div class="feedback-icon"><i class="fas fa-times-circle"></i></div>
+                    <div class="feedback-text">回答错误。</div>
+                    <div class="pinyin-feedback">${question.word} 的正确拼音是 <span class="pinyin-text">${question.pinyin}</span></div>
+                `;
+                feedback.className = 'feedback-container feedback-wrong';
+                feedback.style.display = 'block';
+
+                playWrongSound();
+            }
+
+            updateLevel1Buttons();
+        }
+
+        // 更新第一关按钮状态
+        function updateLevel1Buttons() {
+            const level = gameData.level1;
+            const currentIndex = level.currentQuestionIndex;
+
+            document.getElementById('prev-level1').disabled = currentIndex === 0;
+            document.getElementById('reset-level1').disabled = level.userAnswers[currentIndex] === null;
+            document.getElementById('next-level1').disabled = level.userAnswers[currentIndex] === null;
+        }
+
+        // 显示第二关题目（改为文字句子，不再显示图片）
+        function showLevel2Question() {
+            const level = gameData.level2;
+            const currentIndex = level.currentQuestionIndex;
+            const question = level.questions[currentIndex];
+
+            // 进度
+            document.getElementById('level2-progress').textContent = `${currentIndex + 1}/4`;
+            document.getElementById('current-question-num').textContent = currentIndex + 1;
+
+            // 原来的图片区域，现在用来显示句子
+            const imageDisplay = document.getElementById('level2-image-display');
+            imageDisplay.innerHTML = '';
+
+            const sentenceContainer = document.createElement('div');
+            sentenceContainer.className = 'level2-sentence-container';
+
+            const sentenceElement = document.createElement('div');
+            sentenceElement.id = 'level2-sentence';
+            sentenceElement.className = 'level2-sentence';
+            sentenceElement.textContent = question.sentence;
+
+            sentenceContainer.appendChild(sentenceElement);
+            imageDisplay.appendChild(sentenceContainer);
+
+            // 生成选项
+            const optionsContainer = document.getElementById('level2-options');
+            optionsContainer.innerHTML = '';
+
+            const shuffledOptions = [...question.options].sort(() => Math.random() - 0.5);
+
+            shuffledOptions.forEach((option) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.textContent = option;
+                optionElement.dataset.answer = option;
+
+                if (level.userAnswers[currentIndex] === option) {
+                    optionElement.classList.add('selected');
+                }
+
+                optionElement.addEventListener('click', handleLevel2OptionClick);
+                optionsContainer.appendChild(optionElement);
+            });
+
+            const feedback = document.getElementById('level2-feedback');
+            feedback.style.display = 'none';
+            feedback.className = 'feedback-container';
+
+            updateLevel2Buttons();
+        }
+
+        // 处理第二关选项点击
+        function handleLevel2OptionClick() {
+            const options = document.querySelectorAll('#level2-options .option');
+            options.forEach(option => {
+                option.classList.remove('selected');
+            });
+
+            this.classList.add('selected');
+
+            const answer = this.dataset.answer;
+            const currentIndex = gameData.level2.currentQuestionIndex;
+            gameData.level2.userAnswers[currentIndex] = answer;
+
+            checkLevel2Answer(answer);
+        }
+
+        // 检查第二关答案（句子 + 正确解释）
+        function checkLevel2Answer(userAnswer) {
+            const level = gameData.level2;
+            const currentIndex = level.currentQuestionIndex;
+            const question = level.questions[currentIndex];
+            const options = document.querySelectorAll('#level2-options .option');
+
+            const feedback = document.getElementById('level2-feedback');
+
+            if (userAnswer === question.correctAnswer) {
+                // 标记选中的选项为正确
+                options.forEach(option => {
+                    if (option.dataset.answer === userAnswer) {
+                        option.classList.add('correct');
+                    }
+                });
+
+                feedback.innerHTML = `
+            <div class="feedback-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="feedback-text">
+                回答正确！正确意思是：${question.correctAnswer}
+            </div>
+        `;
+                feedback.className = 'feedback-container feedback-correct';
+                feedback.style.display = 'block';
+
+                playCorrectSound();
+            } else {
+                // 标记错题和正确答案
+                options.forEach(option => {
+                    if (option.dataset.answer === userAnswer) {
+                        option.classList.add('wrong');
+                    }
+                    if (option.dataset.answer === question.correctAnswer) {
+                        option.classList.add('correct');
+                    }
+                });
+
+                feedback.innerHTML = `
+            <div class="feedback-icon"><i class="fas fa-times-circle"></i></div>
+            <div class="feedback-text">
+                回答错误。正确答案是：${question.correctAnswer}
+            </div>
+        `;
+                feedback.className = 'feedback-container feedback-wrong';
+                feedback.style.display = 'block';
+
+                playWrongSound();
+            }
+
+            updateLevel2Buttons();
+        }
+
+        // 更新第二关按钮状态（这一段原样保留即可）
+        function updateLevel2Buttons() {
+            const level = gameData.level2;
+            const currentIndex = level.currentQuestionIndex;
+
+            document.getElementById('prev-level2').disabled = currentIndex === 0;
+            document.getElementById('reset-level2').disabled = level.userAnswers[currentIndex] === null;
+            document.getElementById('next-level2').disabled = level.userAnswers[currentIndex] === null;
+        }
+
+
+        // 显示第三关题目
+        function showLevel3Question() {
+            const level = gameData.level3;
+            const currentIndex = level.currentQuestionIndex;
+            const question = level.questions[currentIndex];
+
+            document.getElementById('level3-progress').textContent = `${currentIndex + 1}/13`;
+            document.getElementById('level3-sentence').textContent = question.sentence;
+
+            const optionsContainer = document.getElementById('level3-options');
+            optionsContainer.innerHTML = '';
+
+            const shuffledOptions = [...question.options].sort(() => Math.random() - 0.5);
+
+            shuffledOptions.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.textContent = option;
+                optionElement.dataset.answer = option;
+
+                if (level.userAnswers[currentIndex] === option) {
+                    optionElement.classList.add('selected');
+                }
+
+                optionElement.addEventListener('click', handleLevel3OptionClick);
+                optionsContainer.appendChild(optionElement);
+            });
+
+            const feedback = document.getElementById('level3-feedback');
+            feedback.style.display = 'none';
+            feedback.className = 'feedback-container';
+
+            updateLevel3Buttons();
+        }
+
+        // 处理第三关选项点击
+        function handleLevel3OptionClick() {
+            const options = document.querySelectorAll('#level3-options .option');
+            options.forEach(option => {
+                option.classList.remove('selected');
+            });
+
+            this.classList.add('selected');
+
+            const answer = this.dataset.answer;
+            const currentIndex = gameData.level3.currentQuestionIndex;
+            gameData.level3.userAnswers[currentIndex] = answer;
+
+            checkLevel3Answer(answer);
+        }
+
+        // 检查第三关答案
+        function checkLevel3Answer(userAnswer) {
+            const level = gameData.level3;
+            const currentIndex = level.currentQuestionIndex;
+            const question = level.questions[currentIndex];
+            const options = document.querySelectorAll('#level3-options .option');
+
+            const feedback = document.getElementById('level3-feedback');
+
+            if (userAnswer === question.correctAnswer) {
+                options.forEach(option => {
+                    if (option.dataset.answer === userAnswer) {
+                        option.classList.add('correct');
+                    }
+                });
+
+                feedback.innerHTML = `
+                    <div class="feedback-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="feedback-text">回答正确！句子应该填：${question.correctAnswer}</div>
+                `;
+                feedback.className = 'feedback-container feedback-correct';
+                feedback.style.display = 'block';
+
+                playCorrectSound();
+            } else {
+                options.forEach(option => {
+                    if (option.dataset.answer === userAnswer) {
+                        option.classList.add('wrong');
+                    }
+                    if (option.dataset.answer === question.correctAnswer) {
+                        option.classList.add('correct');
+                    }
+                });
+
+                feedback.innerHTML = `
+                    <div class="feedback-icon"><i class="fas fa-times-circle"></i></div>
+                    <div class="feedback-text">回答错误。句子的正确答案是：${question.correctAnswer}</div>
+                `;
+                feedback.className = 'feedback-container feedback-wrong';
+                feedback.style.display = 'block';
+
+                playWrongSound();
+            }
+
+            updateLevel3Buttons();
+        }
+
+        // 更新第三关按钮状态
+        function updateLevel3Buttons() {
+            const level = gameData.level3;
+            const currentIndex = level.currentQuestionIndex;
+
+            document.getElementById('prev-level3').disabled = currentIndex === 0;
+            document.getElementById('reset-level3').disabled = level.userAnswers[currentIndex] === null;
+            document.getElementById('next-level3').disabled = level.userAnswers[currentIndex] === null;
+        }
+
+        // 显示页面
+        function showPage(page) {
+            mapPage.style.display = 'none';
+            level1Page.style.display = 'none';
+            level2Page.style.display = 'none';
+            level3Page.style.display = 'none';
+            resultPage.style.display = 'none';
+
+            page.style.display = 'block';
+        }
+
+        // 显示地图页面
+        function showMapPage() {
+            showPage(mapPage);
+        }
+
+        // 显示第一关页面
+        function showLevel1Page() {
+            showLevel1Question();
+            showPage(level1Page);
+        }
+
+        // 显示第二关页面
+        function showLevel2Page() {
+            showLevel2Question();
+            showPage(level2Page);
+        }
+
+        // 显示第三关页面
+        function showLevel3Page() {
+            showLevel3Question();
+            showPage(level3Page);
+        }
+
+        // 重置当前题目选择
+        function resetCurrentQuestion() {
+            const levelNum = gameData.currentLevel;
+            let level;
+
+            if (levelNum === 1) {
+                level = gameData.level1;
+            } else if (levelNum === 2) {
+                level = gameData.level2;
+            } else {
+                level = gameData.level3;
+            }
+
+            const currentIndex = level.currentQuestionIndex;
+            level.userAnswers[currentIndex] = null;
+
+            if (levelNum === 1) {
+                showLevel1Question();
+            } else if (levelNum === 2) {
+                showLevel2Question();
+            } else {
+                showLevel3Question();
+            }
+        }
+
+        // 显示关卡完成提示
+        function showLevelComplete(levelNum) {
+            let title, message, iconClass;
+
+            switch (levelNum) {
+                case 1:
+                    title = "恭喜完成第一关！";
+                    message = "您已成功掌握四个词语的正确拼音！可以进入下一关了！";
+                    iconClass = "fas fa-language";
+                    break;
+                case 2:
+                    title = "恭喜完成第二关！";
+                    message = "您已成功通过本周阅读理解！可以进入最后一关了！";
+                    iconClass = "fas fa-images";
+                    break;
+                case 3:
+                    title = "恭喜完成第三关！";
+                    message = "您已成功学会在句子中正确使用这些词语！所有关卡都已完成！";
+                    iconClass = "fas fa-edit";
+                    break;
+            }
+
+            completeTitle.textContent = title;
+            completeMessage.textContent = message;
+            completeIcon.innerHTML = `<i class="${iconClass}"></i>`;
+
+            if (levelNum === 3) {
+                continueButton.innerHTML = `<i class="fas fa-award"></i> 查看学习成果`;
+            } else {
+                continueButton.innerHTML = `<i class="fas fa-arrow-right"></i> 继续下一关`;
+            }
+
+            levelCompleteOverlay.style.display = 'flex';
+
+            playCompleteSound();
+        }
+
+        // 处理第一关下一题
+        function handleLevel1Next() {
+            const level = gameData.level1;
+
+            level.currentQuestionIndex++;
+
+            if (level.currentQuestionIndex < level.questions.length) {
+                showLevel1Question();
+            } else {
+                // ✅ Only complete the level if 4 or more answers are provided
+                if (hasAnsweredMinimum(level, 4)) {
+                    gameData.levelCompleted[0] = true;
+                    updateLevelUnlock();
+                    showLevelComplete(1);
+                } else {
+                    alert("请至少回答4道题目才能进入下一关！");
+                }
+
+                level.currentQuestionIndex = 0;
+            }
+        }
+
+        // 处理第一关上一题
+        function handleLevel1Prev() {
+            const level = gameData.level1;
+            if (level.currentQuestionIndex > 0) {
+                level.currentQuestionIndex--;
+                showLevel1Question();
+            }
+        }
+
+        // 处理第二关下一题
+        function handleLevel2Next() {
+            const level = gameData.level2;
+            level.currentQuestionIndex++;
+
+            if (level.currentQuestionIndex < level.questions.length) {
+                showLevel2Question();
+            } else {
+                gameData.levelCompleted[1] = true;
+                updateLevelUnlock();
+
+                showLevelComplete(2);
+
+                level.currentQuestionIndex = 0;
+            }
+        }
+
+        // 处理第二关上一题
+        function handleLevel2Prev() {
+            const level = gameData.level2;
+            if (level.currentQuestionIndex > 0) {
+                level.currentQuestionIndex--;
+                showLevel2Question();
+            }
+        }
+
+        // 处理第三关下一题
+        function handleLevel3Next() {
+            const level = gameData.level3;
+            level.currentQuestionIndex++;
+
+            if (level.currentQuestionIndex < level.questions.length) {
+                showLevel3Question();
+            } else {
+                gameData.levelCompleted[2] = true;
+
+                showLevelComplete(3);
+
+                level.currentQuestionIndex = 0;
+            }
+        }
+
+        // 处理第三关上一题
+        function handleLevel3Prev() {
+            const level = gameData.level3;
+            if (level.currentQuestionIndex > 0) {
+                level.currentQuestionIndex--;
+                showLevel3Question();
+            }
+        }
+
+        // 显示最终结果
+        function showFinalResult() {
+            showPage(resultPage);
+        }
+
+        // 重置游戏
+        function resetGame() {
+            gameData.currentLevel = 1;
+            gameData.levelCompleted = [false, false, false];
+
+            gameData.level1.currentQuestionIndex = 0;
+            gameData.level1.userAnswers = [null, null, null, null];
+
+            gameData.level2.currentQuestionIndex = 0;
+            gameData.level2.userAnswers = [null, null, null, null];
+
+            gameData.level3.currentQuestionIndex = 0;
+            gameData.level3.userAnswers = [null, null, null, null];
+
+            updateLevelUnlock();
+            showMapPage();
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            levelPoints.forEach((point, index) => {
+                point.addEventListener('click', function () {
+                    if (this.classList.contains('locked')) return;
+
+                    gameData.currentLevel = index + 1;
+
+                    switch (index) {
+                        case 0:
+                            showLevel1Page();
+                            break;
+                        case 1:
+                            showLevel2Page();
+                            break;
+                        case 2:
+                            showLevel3Page();
+                            break;
+                    }
+                });
+            });
+
+            document.getElementById('back-to-map-1').addEventListener('click', showMapPage);
+            document.getElementById('back-to-map-2').addEventListener('click', showMapPage);
+            document.getElementById('back-to-map-3').addEventListener('click', showMapPage);
+
+            document.getElementById('next-level1').addEventListener('click', handleLevel1Next);
+            document.getElementById('next-level2').addEventListener('click', handleLevel2Next);
+            document.getElementById('next-level3').addEventListener('click', handleLevel3Next);
+
+            document.getElementById('prev-level1').addEventListener('click', handleLevel1Prev);
+            document.getElementById('prev-level2').addEventListener('click', handleLevel2Prev);
+            document.getElementById('prev-level3').addEventListener('click', handleLevel3Prev);
+
+            document.getElementById('reset-level1').addEventListener('click', resetCurrentQuestion);
+            document.getElementById('reset-level2').addEventListener('click', resetCurrentQuestion);
+            document.getElementById('reset-level3').addEventListener('click', resetCurrentQuestion);
+
+            document.getElementById('restart-game').addEventListener('click', resetGame);
+
+            continueButton.addEventListener('click', function () {
+                levelCompleteOverlay.style.display = 'none';
+
+                if (gameData.currentLevel === 3) {
+                    showFinalResult();
+                } else {
+                    showMapPage();
+                }
+            });
+
+            levelCompleteOverlay.addEventListener('click', function (e) {
+                if (e.target === this) {
+                    this.style.display = 'none';
+                }
+            });
+        }
+
+        // 初始化游戏
+        document.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+
+</html>
