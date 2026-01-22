@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+    <meta charset="UTF-8" />
+    <title>岳飞学写字 - 故事与拼音</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #66b2e6 0%, #0092d3 50%, #005b99 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #fff;
+            overflow-x: hidden;
+            font-family: "Microsoft Yahei", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 1000px;
+            background-color: rgba(255, 255, 255, 0.06);
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            position: relative;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(10px);
+        }
+
+        .game-header {
+            background: linear-gradient(to right, #0077b6, #005b99);
+            color: #ffe08a;
+            padding: 25px 30px;
+            text-align: center;
+            position: relative;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .game-header h1 {
+            font-size: 2.4rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            letter-spacing: 2px;
+        }
+
+        .game-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto;
+            color: #fff9c4;
+        }
+
+        .moon-decoration {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #fff7d6 30%, #ffd54f 70%);
+            border-radius: 50%;
+            top: 20px;
+            right: 30px;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.7);
+        }
+
+        .main-content {
+            padding: 30px;
+            min-height: 400px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="10" cy="90" r="2" fill="%23f4c97a"/><circle cx="40" cy="85" r="1.5" fill="%23e0b878"/><circle cx="70" cy="92" r="1" fill="%23f4c97a"/><circle cx="30" cy="75" r="2" fill="%23e0b878"/><circle cx="80" cy="88" r="1.5" fill="%23d3a76e"/><circle cx="20" cy="80" r="1" fill="%23f4c97a"/></svg>');
+        }
+
+        .story-title {
+            font-size: 1.6rem;
+            margin-bottom: 20px;
+            color: #ffeb99;
+            text-align: center;
+        }
+
+        .story-section {
+            margin-bottom: 18px;
+            padding: 12px 14px;
+            background-color: rgba(0, 0, 0, 0.25);
+            border-radius: 12px;
+        }
+
+        .story-chinese {
+            font-size: 1.15rem;
+            margin-bottom: 6px;
+            line-height: 1.6;
+        }
+
+        .story-pinyin {
+            font-size: 0.95rem;
+            color: #fffbdd;
+            opacity: 0.95;
+            line-height: 1.6;
+        }
+
+        .highlight-name {
+            color: #ffe08a;
+            font-weight: bold;
+        }
+
+        .footer-note {
+            margin-top: 25px;
+            font-size: 0.9rem;
+            text-align: center;
+            color: #fffbdd;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <div class="game-header">
+        <h1>岳飞学写字</h1>
+        <p>阅读故事，跟着拼音朗读，感受岳飞刻苦学习的精神。</p>
+        <div class="moon-decoration"></div>
+    </div>
+
+    <div class="main-content">
+        <div class="story-title">故事与拼音 Story &amp; Pinyin</div>
+
+        <div class="story-section">
+            <div class="story-chinese">800多年以前，中国有一位百战百胜的将军，他的名字叫岳飞。</div>
+            <div class="story-pinyin">bāi líng líng duō nián yǐqián，Zhōngguó yǒu yí wèi bǎi zhàn bǎi shèng de jiāngjūn，tā de míngzì jiào <span class="highlight-name">Yuè Fēi</span>。</div>
+        </div>
+
+        <div class="story-section">
+            <div class="story-chinese">岳飞很小的时候，父亲就死了。他家里很穷，母亲来养活他。</div>
+            <div class="story-pinyin"><span class="highlight-name">Yuè Fēi</span> hěn xiǎo de shíhòu，fùqīn jiù sǐ le。Tā jiālǐ hěn qióng，mǔqīn lái yǎnghuó tā。</div>
+        </div>
+
+        <div class="story-section">
+            <div class="story-chinese">岳飞六岁了，他知道家里没有钱让自己上学校，就对母亲说：“妈妈，您来当我的老师，教我读书写字，好不好？”</div>
+            <div class="story-pinyin"><span class="highlight-name">Yuè Fēi</span> liù suì le，tā zhīdào jiālǐ méiyǒu qián ràng zìjǐ shàng xuéxiào，jiù duì mǔqīn shuō：“māma，nín lái dāng wǒ de lǎoshī，jiāo wǒ dúshū xiězì，hǎo bù hǎo？”</div>
+        </div>
+
+        <div class="story-section">
+            <div class="story-chinese">母亲高兴地说：“好！”可是家里没有纸和笔，怎么写字呢？</div>
+            <div class="story-pinyin">Mǔqīn gāoxìng de shuō：“hǎo！”kěshì jiālǐ méiyǒu zhǐ hé bǐ，zěnme xiězì ne？</div>
+        </div>
+
+        <div class="story-section">
+            <div class="story-chinese">有一天，母亲拿着新织成的布，对岳飞说：“孩子，你到街上去把这布卖了，再买些纸和笔回家来，我来教你写字。”</div>
+            <div class="story-pinyin">Yǒu yì tiān，mǔqīn názhe xīn zhī chéng de bù，duì <span class="highlight-name">Yuè Fēi</span> shuō：“háizi，nǐ dào jiēshàng qù bǎ zhè bù mài le，zài mǎi xiē zhǐ hé bǐ huí jiā lái，wǒ lái jiāo nǐ xiězì。”</div>
+        </div>
+
+        <div class="story-section">
+            <div class="story-chinese">岳飞到了街上，把布卖了，却没有去买纸和笔。</div>
+            <div class="story-pinyin"><span class="highlight-name">Yuè Fēi</span> dào le jiēshàng，bǎ bù mài le，què méiyǒu qù mǎi zhǐ hé bǐ。</div>
+        </div>
+
+        <div class="story-section">
+            <div class="story-chinese">他跑到一条大江边，装了满满一簸箕的沙，又找了几根树枝，插在沙上面。</div>
+            <div class="story-pinyin">Tā pǎo dào yì tiáo dà jiāng biān，zhuāng le mǎnmǎn yí bòji de shā，yòu zhǎo le jǐ gēn shùzhī，chā zài shā shàngmiàn。</div>
+        </div>
+
+        <div class="story-section">
+            <div class="story-chinese">然后双手捧着簸箕，高高兴兴地回家了。</div>
+            <div class="story-pinyin">Ránhòu shuāngshǒu pěngzhe bòji，gāogāoxìngxìng de huí jiā le。</div>
+        </div>
+
+        <div class="story-section">
+            <div class="story-chinese">岳飞把簸箕放在门口，把卖来的钱全部交给了母亲。</div>
+            <div class="story-pinyin"><span class="highlight-name">Yuè Fēi</span> bǎ bòji fàng zài ménkǒu，bǎ mài lái de qián quánbù jiāo gěi le mǔqīn。</div>
+        </div>
+
+        <div class="story-section">
+            <div class="story-chinese">母亲奇怪地问：“我不是让你用这钱去买纸和笔的吗？难道你忘了？”</div>
+            <div class="story-pinyin">Mǔqīn qíguài de wèn：“wǒ bú shì ràng nǐ yòng zhè qián qù mǎi zhǐ hé bǐ de ma？Nándào nǐ wàng le？”</div>
+        </div>
+
+        <div class="story-section">
+            <div class="story-chinese">岳飞说：“妈妈您来看，我的纸和笔都有了。”</div>
+            <div class="story-pinyin"><span class="highlight-name">Yuè Fēi</span> shuō：“māma nín lái kàn，wǒ de zhǐ hé bǐ dōu yǒu le。”</div>
+        </div>
+
+        <div class="story-section">
+            <div class="story-chinese">妈妈看到簸箕里的沙和树枝，立刻明白了。</div>
+            <div class="story-pinyin">Māma kàndào bòji lǐ de shā hé shùzhī，lìkè míngbai le。</div>
+        </div>
+
+        <div class="story-section">
+            <div class="story-chinese">从此，她就把沙铺在地上当作纸，用树枝当作笔，每天教岳飞写字。</div>
+            <div class="story-pinyin">Cóngcǐ，tā jiù bǎ shā pū zài dìshàng dāngzuò zhǐ，yòng shùzhī dāngzuò bǐ，měitiān jiāo <span class="highlight-name">Yuè Fēi</span> xiězì。</div>
+        </div>
+
+        <div class="story-section">
+            <div class="story-chinese">岳飞长大以后，不但成了一位勇敢的将军，而且还是中国历史上很了不起的诗人呢。</div>
+            <div class="story-pinyin"><span class="highlight-name">Yuè Fēi</span> zhǎngdà yǐhòu，búdàn chéng le yí wèi yǒnggǎn de jiāngjūn，érqiě hái shì Zhōngguó lìshǐ shàng hěn liǎobuqǐ de shīrén ne。</div>
+        </div>
+
+        <div class="footer-note">
+            小提示：可以先看汉字，再跟着拼音朗读一遍，试着自己复述这个故事。
+        </div>
+    </div>
+</div>
+</body>
+</html>
