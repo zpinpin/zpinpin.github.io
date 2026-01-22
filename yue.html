@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>岳飞学写字 - 树枝写字</title>
+    <style>
+        /* Keep your ORIGINAL ocean colors, just add tree branch styling */
+        body {
+            background: linear-gradient(135deg, #66b2e6 0%, #0092d3 50%, #005b99 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #fff;
+            overflow-x: hidden;
+            font-family: "Microsoft Yahei", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            position: relative;
+        }
+
+        /* Add wood grain pattern OVER ocean background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(ellipse 15% 8% at 25% 75%, rgba(160, 82, 45, 0.1) 0%, transparent 50%),
+                radial-gradient(circle 6% at 75% 35%, rgba(139, 69, 19, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 1000px;
+            background-color: rgba(255, 255, 255, 0.06);
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            position: relative;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(10px);
+        }
+
+        .game-header {
+            background: linear-gradient(to right, #0077b6, #005b99);
+            /* ORIGINAL ocean */
+            color: #ffe08a;
+            padding: 25px 30px;
+            text-align: center;
+            position: relative;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .game-header h1 {
+            font-size: 2.4rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            letter-spacing: 2px;
+        }
+
+        /* Tree branch decoration (works with ocean colors) */
+        .branch-decoration {
+            position: absolute;
+            width: 70px;
+            height: 50px;
+            top: 20px;
+            right: 30px;
+        }
+
+        .branch-main {
+            width: 50px;
+            height: 16px;
+            background: linear-gradient(145deg, #8B4513, #654321);
+            border-radius: 8px 8px 4px 4px;
+            position: absolute;
+            bottom: 0;
+            right: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+        }
+
+        .branch-leaf {
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(ellipse, #90EE90 40%, #228B22 80%);
+            border-radius: 50% 30% 70% 30%;
+            position: absolute;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .leaf1 {
+            top: -12px;
+            left: 12px;
+            transform: rotate(-15deg);
+        }
+
+        .leaf2 {
+            top: -8px;
+            right: -3px;
+            transform: rotate(10deg);
+        }
+
+        .leaf3 {
+            top: -15px;
+            left: 28px;
+            transform: rotate(-30deg);
+        }
+
+        .main-content {
+            padding: 30px;
+            min-height: 400px;
+            /* Add subtle branch pattern to your existing sand stars */
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><circle cx="10" cy="90" r="2" fill="%23f4c97a"/><circle cx="40" cy="85" r="1.5" fill="%23e0b878"/><path d="M25 105 Q55 102 85 108 Q105 110 110 105" stroke="%238B4513" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.2"/></svg>');
+        }
+
+        .story-title {
+            font-size: 1.6rem;
+            margin-bottom: 20px;
+            color: #ffeb99;
+            text-align: center;
+        }
+
+        /* Your existing subtle hover panels */
+        .story-section {
+            margin-bottom: 20px;
+            padding: 18px 20px;
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 16px;
+            border-left: 4px solid rgba(255, 235, 59, 0.4);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .story-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, rgba(255, 235, 59, 0.6), rgba(255, 241, 118, 0.6));
+            opacity: 0;
+        }
+
+        .story-section:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(255, 235, 59, 0.5), 0 0 20px rgba(255, 235, 59, 0.3);
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+            border-left-color: #ffeb3b;
+        }
+
+        .story-section:hover::before {
+            opacity: 1;
+        }
+
+        /* Keep all your other existing styles unchanged */
+        .story-chinese {
+            font-size: 1.15rem;
+            margin-bottom: 6px;
+            line-height: 1.6;
+        }
+
+        .story-pinyin {
+            font-size: 0.95rem;
+            color: #fffbdd;
+            opacity: 0.95;
+            line-height: 1.6;
+        }
+
+        .highlight-name {
+            color: #ffe08a;
+            font-weight: bold;
+        }
+
+        .highlight-branch {
+            color: #D2691E;
+            background: rgba(244, 228, 188, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .footer-note {
+            margin-top: 25px;
+            font-size: 0.9rem;
+            text-align: center;
+            color: #fffbdd;
+            opacity: 0.9;
+        }
+
+        .highlight-vocab1 {
+            color: #D2691E !important;
+            /* Chocolate brown */
+            background: rgba(244, 164, 96, 0.4);
+            /* Sandy beige */
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-weight: bold;
+            box-shadow: 0 1px 3px rgba(210, 105, 30, 0.3);
+            text-shadow: none;
+        }
+
+        .highlight-vocab {
+            color: #2E8B57 !important;
+            /* Sea green - earthy green */
+            background: rgba(144, 238, 144, 0.4);
+            /* Light green - fresh leaves */
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-weight: bold;
+            box-shadow: 0 1px 3px rgba(46, 139, 87, 0.4);
+            /* Darker green shadow */
+            text-shadow: none;
+        }
+
+        .sand-decoration {
+            position: absolute;
+            width: 60px;
+            height: 55px;
+            top: 50px;
+            /* Changed from 20px - NOW LOWER / centered with text */
+            right: 30px;
+        }
+
+        /* Keep everything else the same */
+        .sand-box {
+            width: 55px;
+            height: 22px;
+            background: linear-gradient(145deg, #F4E4BC 0%, #D2B48C 50%, #C19A6B 100%);
+            border-radius: 0 0 12px 12px;
+            position: absolute;
+            bottom: 0;
+            left: 2px;
+            box-shadow:
+                inset 0 2px 4px rgba(255, 255, 255, 0.3),
+                0 3px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .stick {
+            position: absolute;
+            background: linear-gradient(145deg, #8B4513 0%, #654321 100%);
+            border-radius: 3px 1px 1px 3px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+            width: 3px;
+            height: 56px;
+            left: 26px;
+            bottom: 0;
+            transform: rotate(-8deg);
+        }
+
+        .leaf {
+            position: absolute;
+            width: 14px;
+            height: 12px;
+            background: radial-gradient(ellipse, #90EE90 30%, #228B22 70%);
+            border-radius: 70% 30% 60% 40%;
+            left: 22px;
+            top: -14px;
+            transform: rotate(-15deg);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+
+        @media (max-width: 768px) {
+            .game-header h1 {
+                font-size: 2rem;
+            }
+
+            .story-chinese {
+                font-size: 1.1rem;
+            }
+
+            .story-pinyin {
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <h1>🌿 岳飞学写字</h1>
+            <p>用树枝在沙子上刻苦练字，感受古代学习的智慧与坚持</p>
+            <div class="sand-decoration">
+                <div class="sand-box"></div>
+                <div class="stick stick1"></div>
+                <div class="leaf"></div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="story-title">沙作纸，🌿作笔 Story & Pinyin</div>
+            <div class="story-section">
+                <div class="story-chinese">八百多年以前，中国有一位<span class="highlight-vocab1">百战百胜</span>的将军，他的<span
+                        class="highlight-vocab1">名字</span>叫岳飞。</div>
+                <div class="story-pinyin">bāi líng líng duō nián yǐqián，Zhōngguó yǒu yí wèi <span
+                        class="highlight-vocab1">bǎi zhàn bǎi shèng</span> de jiāngjūn，tā de <span
+                        class="highlight-vocab1">míngzì</span> jiào <span class="highlight-name">Yuè Fēi</span>。
+                </div>
+            </div>
+
+            <div class="story-section">
+                <div class="story-chinese">岳飞很小的时候，父亲就死了。他家里很穷，<span class="highlight-vocab1">靠母亲织布</span>来养活他。
+                </div>
+                <div class="story-pinyin"><span class="highlight-name">Yuè Fēi</span> hěn xiǎo de shíhòu，fùqīn jiù
+                    sǐ le。Tā jiālǐ hěn qióng，<span class="highlight-vocab1">kào mǔqīn zhībù</span> lái yǎnghuó tā。
+                </div>
+            </div>
+
+            <div class="story-section">
+                <div class="story-chinese">岳飞<span class="highlight-vocab1">六岁</span>了，他知道家里没有<span
+                        class="highlight-vocab1">钱</span>让自己上<span class="highlight-vocab1">学校</span>，就对母亲说："妈妈，您<span
+                        class="highlight-vocab1">做我的老师</span>，教我读书<span class="highlight-vocab1">写字</span>，<span
+                        class="highlight-vocab1">好不好</span>？"</div>
+                <div class="story-pinyin"><span class="highlight-name">Yuè Fēi</span> <span class="highlight-vocab1">liù
+                        suì</span> le，tā zhīdào jiālǐ méiyǒu <span class="highlight-vocab1">qián</span> ràng zìjǐ shàng
+                    <span class="highlight-vocab1">xuéxiào</span>，jiù duì mǔqīn shuō："māma，nín <span
+                        class="highlight-vocab1">zuò wǒ de lǎoshī</span>，jiāo wǒ dúshū <span
+                        class="highlight-vocab1">xiězì</span>，<span class="highlight-vocab1">hǎo bù hǎo</span>？"
+                </div>
+            </div>
+
+            <div class="story-section">
+                <div class="story-chinese">母亲高兴地说："<span class="highlight-vocab1">好啊</span>！"，可是家里没有<span
+                        class="highlight-vocab1">纸和笔</span>，怎么<span class="highlight-vocab1">学写字</span>呢？</div>
+                <div class="story-pinyin">Mǔqīn gāoxìng de shuō："<span class="highlight-vocab1">hǎo a</span>！"，kěshì
+                    jiālǐ méiyǒu <span class="highlight-vocab1">zhǐ hé bǐ</span>，zěnme <span
+                        class="highlight-vocab1">xué xiězì</span> ne？</div>
+            </div>
+
+
+            <div class="story-section">
+                <div class="story-chinese">有一天，母亲拿着新织成的布，对岳飞说：“孩子，你到<span
+                        class="highlight-vocab">街上</span>去把这布卖了，再买些纸和笔回家来，我来教你写字。”</div>
+                <div class="story-pinyin">Yǒu yì tiān，mǔqīn názhe xīn zhī chéng de bù，duì <span
+                        class="highlight-name">Yuè Fēi</span> shuō："háizi，nǐ dào <span
+                        class="highlight-vocab">jiēshàng</span> qù bǎ zhè bù mài le，zài mǎi xiē zhǐ hé bǐ huí jiā
+                    lái，wǒ
+                    lái jiāo nǐ xiězì。"</div>
+            </div>
+            <div class="story-section">
+                <div class="story-chinese">岳飞到了<span class="highlight-vocab">街上</span>，把布<span
+                        class="highlight-vocab">卖了</span>，<span class="highlight-vocab">却</span>没有去买纸和笔。</div>
+                <div class="story-pinyin"><span class="highlight-name">Yuè Fēi</span> dào le <span
+                        class="highlight-vocab">jiēshàng</span>，bǎ bù <span class="highlight-vocab">màile</span>，<span
+                        class="highlight-vocab">què</span> méiyǒu qù mǎi zhǐ hé bǐ。</div>
+            </div>
+
+            <div class="story-section">
+                <div class="story-chinese">他跑到一条<span class="highlight-vocab">大江</span>边，装了满满一簸箕的沙，又找了几根树枝，插在沙上面。</div>
+                <div class="story-pinyin">Tā pǎo dào yì tiáo <span class="highlight-vocab">dà jiāng</span> biān，zhuāng
+                    le mǎnmǎn yì bòji de shā，yòu zhǎo le jǐ gēn shùzhī，chā zài shā shàngmiàn。</div>
+            </div>
+
+            <div class="story-section">
+                <div class="story-chinese">然后双手捧着簸箕，高高兴兴地回家了。</div>
+                <div class="story-pinyin">Ránhòu shuāngshǒu pěngzhe bòji，gāogāoxìngxìng de huí jiā le。</div>
+            </div>
+
+            <div class="story-section">
+                <div class="story-chinese">岳飞把簸箕<span class="highlight-vocab">放在</span>门口，把卖布得来的<span
+                        class="highlight-vocab">钱全部交给</span>了母亲。</div>
+                <div class="story-pinyin"><span class="highlight-name">Yuè Fēi</span> bǎ bòji <span
+                        class="highlight-vocab">fàng zài</span> ménkǒu，bǎ <span class="highlight-vocab">mài bù dé lái de
+                        qián</span> <span class="highlight-vocab">quánbù jiāogěi</span> le mǔqīn。</div>
+            </div>
+
+            <div class="story-section">
+                <div class="story-chinese">母亲奇怪的问？"我不是让你用这<span class="highlight-vocab">钱</span>去买纸和笔的吗？难道你<span
+                        class="highlight-vocab">忘了</span>？"</div>
+                <div class="story-pinyin">Mǔqīn qíguài de wèn？"Wǒ bú shì ràng nǐ yòng zhè <span
+                        class="highlight-vocab">qián</span> qù mǎi zhǐ hé bǐ de ma？Nándào nǐ <span
+                        class="highlight-vocab">wàng le</span>？"</div>
+            </div>
+
+            <div class="story-section">
+                <div class="story-chinese">岳飞说："妈妈您来看，我的纸和笔都有了。"</div>
+                <div class="story-pinyin"><span class="highlight-name">Yuè Fēi</span> shuō："Māma nín lái kàn，wǒ de zhǐ
+                    hé bǐ dōu yǒu le。"</div>
+            </div>
+
+            <div class="story-section">
+                <div class="story-chinese">妈妈看到簸箕里的沙和树枝，立刻<span class="highlight-vocab">明白了</span>。</div>
+                <div class="story-pinyin">Māma kàndào bòji lǐ de shā hé shùzhī，lìkè <span
+                        class="highlight-vocab">míngbai le</span>。</div>
+            </div>
+
+            <div class="story-section">
+                <div class="story-chinese"><span class="highlight-vocab">从此</span>，她就把沙铺在地上当作纸，用树枝当作笔，<span
+                        class="highlight-vocab">每天</span>教岳飞写字。</div>
+                <div class="story-pinyin"><span class="highlight-vocab">Cóngcǐ</span>，tā jiù bǎ shā pū zài dìshàng
+                    dāngzuò zhǐ，yòng shùzhī dāngzuò bǐ，<span class="highlight-vocab">měitiān</span> jiāo <span
+                        class="highlight-name">Yuè Fēi</span> xiězì。</div>
+            </div>
+
+            <div class="story-section">
+                <div class="story-chinese">岳飞长大以后，<span class="highlight-vocab">不但</span>成了一位勇敢的将军，<span
+                        class="highlight-vocab">而且</span>还是中国历史上很了不起的诗人呢！</div>
+                <div class="story-pinyin"><span class="highlight-name">Yuè Fēi</span> zhǎngdà yǐhòu，<span
+                        class="highlight-vocab">búdàn</span> chéng le yí wèi yǒnggǎn de jiāngjūn，<span
+                        class="highlight-vocab">érqiě</span> hái shì Zhōngguó lìshǐ shàng hěn liǎobuqǐ de shīrén ne！
+                </div>
+            </div>
+            <div class="footer-note">
+                🌿 小提示：重点词汇 <span class="highlight-vocab1">名字 百战百胜 六岁 学校 老师 好啊 拿着 写字 卖了 买些 纸笔</span>
+                <br>🌿 小提示：重点词汇 <span class="highlight-vocab">街上 大江 却 钱 忘了 全部 交给 明白 从此 放在 每天 不但 而且</span>
+            </div>
+        </div>
+    </div>
+    </div>
+</body>
+
+</html>
