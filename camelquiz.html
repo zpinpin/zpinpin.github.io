@@ -1,0 +1,2036 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>找骆驼闯关游戏</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 沙漠主题：黄沙渐变 */
+        body {
+            background: linear-gradient(135deg,
+                    #f4c097 0%,
+                    #d4a574 30%,
+                    #b8860b 60%,
+                    #8b4513 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #2c1810;
+            overflow-x: hidden;
+            font-family: "Microsoft Yahei", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            position: relative;
+        }
+
+        /* 沙漠热浪背景图案 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(circle at 20% 80%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 165, 0, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* 沙漠容器：沙色玻璃效果 */
+        .game-container {
+            width: 100%;
+            max-width: 1000px;
+            background: linear-gradient(145deg,
+                    rgba(248, 216, 152, 0.95) 0%,
+                    rgba(210, 165, 104, 0.9) 100%);
+            border-radius: 25px;
+            box-shadow:
+                0 20px 40px rgba(139, 69, 19, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            overflow: hidden;
+            position: relative;
+            border: 3px solid rgba(255, 215, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        /* 沙漠金色头部 */
+        .game-header {
+            background: linear-gradient(to right, #d2691e, #b8860b, #cd853f);
+            color: #2c1810;
+            padding: 25px 30px;
+            text-align: center;
+            position: relative;
+            border-bottom: 3px solid rgba(255, 215, 0, 0.9);
+        }
+
+        .game-header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+
+        .game-header p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            max-width: 700px;
+            margin: 0 auto;
+            color: #3c2f2f;
+        }
+
+        /* 沙漠地图：黄沙渐变 */
+        .map {
+            background: linear-gradient(to bottom,
+                    rgba(244, 192, 151, 0.95) 0%,
+                    rgba(218, 165, 32, 0.95) 60%,
+                    rgba(139, 69, 19, 0.9) 100%);
+            border: 3px solid rgba(255, 215, 0, 0.8);
+        }
+
+
+        .levels-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 90%;
+            position: relative;
+            z-index: 2;
+        }
+
+        .level-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 28%;
+        }
+
+        .level-point {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .level-point:hover {
+            transform: scale(1.15);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
+        }
+
+        .level-point.locked {
+            background: #555 !important;
+            cursor: not-allowed;
+            filter: grayscale(0.8);
+        }
+
+        .level-point.locked:hover {
+            transform: scale(1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* 关卡按钮：沙漠橙棕渐变 */
+        .level-1 {
+            background: radial-gradient(circle, #daa520, #b8860b);
+        }
+
+        .level-2 {
+            background: radial-gradient(circle, #ff8c00, #daa520);
+        }
+
+        .level-3 {
+            background: radial-gradient(circle, #cd853f, #a0522d);
+        }
+
+        .level-label {
+            color: #8b4513;
+            background-color: rgba(255, 215, 0, 0.2);
+            border: 1px solid rgba(218, 165, 32, 0.5);
+        }
+
+        .level-description {
+            color: #ffd966;
+            font-size: 1rem;
+            margin-top: 8px;
+            opacity: 0.9;
+        }
+
+        .instructions {
+            background-color: rgba(74, 35, 90, 0.5);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            border-left: 5px solid #ffcc00;
+            color: #ffd966;
+        }
+
+        .instructions i {
+            color: #ffcc00;
+            margin-right: 10px;
+        }
+
+        /* 游戏关卡通用样式 */
+        .game-level {
+            display: none;
+        }
+
+        .level-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 204, 0, 0.3);
+        }
+
+        .level-title {
+            font-size: 2rem;
+            color: rgba(74, 35, 90, 0.7);
+            text-shadow: 0 0 5px rgba(255, 204, 0, 0.5);
+        }
+
+        .level-progress {
+            font-size: 1.3rem;
+            color: #ffcc00;
+            font-weight: bold;
+            background-color: rgba(74, 35, 90, 0.5);
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 204, 0, 0.3);
+        }
+
+        /* 单题容器 */
+        .question-container {
+            background-color: rgba(44, 11, 54, 0.7);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            margin-bottom: 30px;
+            min-height: 350px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border: 2px solid rgba(255, 204, 0, 0.2);
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .question-title {
+            font-size: 1.8rem;
+            color: #ffcc00;
+        }
+
+        .question-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .question-text {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            color: #fff;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        /* 第一关专用拼音字体 */
+        .pinyin-text {
+            font-family: "Arial", sans-serif;
+            font-size: 1.6rem;
+            letter-spacing: 1px;
+        }
+
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            width: 100%;
+            max-width: 700px;
+        }
+
+        .option {
+            padding: 20px 25px;
+            background-color: rgba(74, 35, 90, 0.7);
+            border: 3px solid rgba(255, 204, 0, 0.3);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1.4rem;
+            text-align: center;
+            font-weight: 500;
+            color: #fff;
+        }
+
+        .option:hover {
+            background-color: rgba(102, 51, 153, 0.8);
+            border-color: #ffcc00;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(255, 204, 0, 0.3);
+        }
+
+        .option.selected {
+            background-color: rgba(255, 204, 0, 0.2);
+            border-color: #ffcc00;
+            color: #ffcc00;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(255, 204, 0, 0.5);
+        }
+
+        .option.correct {
+            background-color: rgba(0, 200, 0, 0.3);
+            border-color: #00cc00;
+            color: #ccffcc;
+        }
+
+        .option.wrong {
+            background-color: rgba(200, 0, 0, 0.3);
+            border-color: #ff3333;
+            color: #ffcccc;
+        }
+
+        /* 第二关图片样式 */
+        .image-display {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .image-container {
+            width: 280px;
+            height: 280px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 3px solid rgba(255, 204, 0, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .scene-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .scene-element {
+            position: absolute;
+        }
+
+        /* 圆的图片 - 空心的圆 */
+        .empty-circle {
+            width: 120px;
+            height: 120px;
+            border: 5px solid #ffcc00;
+            border-radius: 50%;
+            background-color: transparent;
+        }
+
+        /* 亮图片 - 发光的圆 */
+        .bright-circle {
+            width: 140px;
+            height: 140px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .glowing-circle {
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, #FFFDE7 0%, #FFF9C4 20%, #FFEE58 60%, #FFD54F 100%);
+            border-radius: 50%;
+            box-shadow:
+                0 0 60px rgba(255, 255, 255, 0.9),
+                0 0 100px rgba(255, 255, 255, 0.6),
+                0 0 140px rgba(255, 255, 255, 0.3),
+                inset 0 0 20px rgba(255, 255, 255, 0.9);
+            animation: glowPulse 2s infinite alternate;
+            z-index: 2;
+        }
+
+        @keyframes glowPulse {
+            from {
+                box-shadow:
+                    0 0 50px rgba(255, 255, 255, 0.8),
+                    0 0 80px rgba(255, 255, 255, 0.5),
+                    0 0 120px rgba(255, 255, 255, 0.2),
+                    inset 0 0 15px rgba(255, 255, 255, 0.8);
+            }
+
+            to {
+                box-shadow:
+                    0 0 70px rgba(255, 255, 255, 1),
+                    0 0 120px rgba(255, 255, 255, 0.7),
+                    0 0 160px rgba(255, 255, 255, 0.4),
+                    inset 0 0 25px rgba(255, 255, 255, 1);
+            }
+        }
+
+        /* 图片通用样式 */
+        .question-image {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 10px;
+            object-fit: contain;
+        }
+
+        .buttons-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 15px 35px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, #ff9900, #cc6600);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(to right, #4a235a, #2c0b36);
+            color: #ffcc00;
+            border: 2px solid #ffcc00;
+        }
+
+        .btn-success {
+            background: linear-gradient(to right, #ff6600, #cc3300);
+            color: white;
+        }
+
+        .btn:disabled {
+            background-color: #666;
+            color: #999;
+            cursor: not-allowed;
+            transform: none;
+            border: none;
+        }
+
+        .btn:hover:not(:disabled) {
+            opacity: 0.9;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .feedback-container {
+            text-align: center;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .feedback-correct {
+            background-color: rgba(0, 200, 0, 0.2);
+            border: 2px solid #00cc00;
+            color: #ccffcc;
+        }
+
+        .feedback-wrong {
+            background-color: rgba(200, 0, 0, 0.2);
+            border: 2px solid #ff3333;
+            color: #ffcccc;
+        }
+
+        .feedback-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .feedback-text {
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        /* 拼音字体统一 */
+        .pinyin-feedback {
+            font-family: "Arial", sans-serif;
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-small {
+            padding: 10px 20px;
+            font-size: 1rem;
+        }
+
+        /* 关卡完成提示 */
+        .level-complete-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.5s;
+        }
+
+        .level-complete-content {
+            background: linear-gradient(135deg, #4a235a, #2c0b36);
+            padding: 40px;
+            border-radius: 25px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            border: 3px solid #ffcc00;
+            box-shadow: 0 0 30px rgba(255, 204, 0, 0.5);
+            animation: scaleIn 0.5s;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .complete-icon {
+            font-size: 5rem;
+            color: #ffcc00;
+            margin-bottom: 20px;
+            animation: bounce 1s infinite alternate;
+        }
+
+        @keyframes bounce {
+            from {
+                transform: translateY(0);
+            }
+
+            to {
+                transform: translateY(-15px);
+            }
+        }
+
+        .complete-title {
+            font-size: 2.5rem;
+            color: #ffcc00;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+        }
+
+        .complete-message {
+            font-size: 1.4rem;
+            color: #ffd966;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        /* 结果页面样式 */
+        .result-container {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .result-icon {
+            font-size: 6rem;
+            margin-bottom: 20px;
+            color: #ffcc00;
+            text-shadow: 0 0 20px rgba(255, 204, 0, 0.7);
+        }
+
+        .result-title {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: rgba(200, 0, 0, 0.2);
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+        }
+
+        .result-details {
+            background-color: rgba(44, 11, 54, 0.7);
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 500px;
+            margin: 20px auto;
+            text-align: left;
+            border: 2px solid rgba(255, 204, 0, 0.2);
+        }
+
+        .result-details h3 {
+            color: #ffcc00;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255, 204, 0, 0.3);
+        }
+
+        .result-summary {
+            color: #ffd966;
+            font-size: 1.2rem;
+            margin-bottom: 25px;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .learned-item {
+            background-color: rgba(255, 204, 0, 0.1);
+            border-left: 4px solid #ffcc00;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        .learned-title {
+            color: #ffcc00;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .learned-words {
+            color: #fff;
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .highlight-word {
+            color: #ffcc00;
+            font-weight: bold;
+            font-size: 1.4rem;
+        }
+
+        .learned-pinyin {
+            font-family: "Arial", sans-serif;
+            color: #ffd966;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .learned-example {
+            color: #ffd966;
+            font-size: 1.1rem;
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+
+        .example-sentence {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 8px 12px;
+            border-radius: 5px;
+            margin-top: 5px;
+            border-left: 3px solid rgba(255, 204, 0, 0.5);
+        }
+
+        .example-word {
+            color: #ffcc00;
+            font-weight: bold;
+        }
+
+        /* 灯笼装饰 */
+        .lantern {
+            position: absolute;
+            width: 40px;
+            height: 60px;
+            background: radial-gradient(ellipse, #ff3333, #cc0000);
+            border-radius: 20px;
+            top: 10px;
+            left: 20px;
+            box-shadow: 0 0 15px rgba(255, 51, 51, 0.7);
+            animation: swing 3s infinite alternate;
+        }
+
+        .lantern:after {
+            content: '';
+            position: absolute;
+            width: 5px;
+            height: 15px;
+            background: #ff9900;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .lantern.right {
+            left: auto;
+            right: 20px;
+            animation-delay: 1s;
+        }
+
+        @keyframes swing {
+            0% {
+                transform: rotate(-5deg);
+            }
+
+            100% {
+                transform: rotate(5deg);
+            }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .options-container {
+                grid-template-columns: 1fr;
+            }
+
+            .game-header h1 {
+                font-size: 2rem;
+            }
+
+            .question-text {
+                font-size: 1.6rem;
+            }
+
+            .option {
+                font-size: 1.2rem;
+                padding: 15px;
+            }
+
+            .buttons-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .control-buttons {
+                flex-direction: column;
+            }
+
+            .levels-container {
+                flex-direction: column;
+                height: 100%;
+                justify-content: space-around;
+            }
+
+            .level-item {
+                width: 100%;
+                margin-bottom: 30px;
+            }
+
+            .path {
+                width: 12px;
+                height: 85%;
+                left: 50%;
+                top: 7.5%;
+                transform: translateX(-50%);
+            }
+
+            .map {
+                height: 500px;
+            }
+
+            .image-container {
+                width: 250px;
+                height: 250px;
+            }
+
+            .empty-circle {
+                width: 100px;
+                height: 100px;
+            }
+
+            .bright-circle {
+                width: 120px;
+                height: 120px;
+            }
+
+            .glowing-circle {
+                width: 100px;
+                height: 100px;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- 关卡完成提示层 -->
+    <div class="level-complete-overlay" id="level-complete-overlay">
+        <div class="level-complete-content">
+            <div class="complete-icon" id="complete-icon">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <h2 class="complete-title" id="complete-title">恭喜完成第一关！</h2>
+            <p class="complete-message" id="complete-message">您已成功掌握本周词语的正确拼音！可以进入下一关了！</p>
+            <button class="btn btn-success" id="continue-button">
+                <i class="fas fa-arrow-right"></i> 继续下一关
+            </button>
+        </div>
+    </div>
+
+    <div class="game-container">
+        <!-- 灯笼装饰 -->
+        <div class="lantern"></div>
+        <div class="lantern right"></div>
+
+
+        <div class="game-header">
+            <h1>🕌 找骆驼侦察闯关游戏</h1>
+            <p>解骆驼之谜！三部侦察闯关，掌握找骆驼相关生词：拼音匹配、读句子选正确意思和选词填空</p>
+            <div class="moon-decoration"></div>
+        </div>
+
+        <div class="main-content">
+            <!-- 地图页面 -->
+            <div id="map-page" class="map-container">
+                <h2 class="map-title">找骆驼闯关地图</h2>
+                <div class="map">
+                    <div class="path"></div>
+                    <div class="levels-container">
+                        <div class="level-item">
+                            <div class="level-point level-1" data-level="1">
+                                <i class="fas fa-language"></i>
+                            </div>
+                            <div class="level-label">拼音匹配</div>
+                            <div class="level-description">匹配词语与正确拼音</div>
+                        </div>
+
+                        <div class="level-item">
+                            <div class="level-point level-2 locked" data-level="2">
+                                <i class="fas fa-images"></i>
+                            </div>
+                            <div class="level-label">读句子</div>
+                            <div class="level-description">读句子选正确意思</div>
+                        </div>
+
+                        <div class="level-item">
+                            <div class="level-point level-3 locked" data-level="3">
+                                <i class="fas fa-edit"></i>
+                            </div>
+                            <div class="level-label">选词填空</div>
+                            <div class="level-description">选择合适的词语填空</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="instructions">
+                    <p><i class="fas fa-info-circle"></i> 游戏说明：点击关卡图标开始挑战。每个关卡有几道题目，完成当前关卡才能解锁下一关。让我们一起学得像老人一样用智慧推理！！
+                    </p>
+                </div>
+            </div>
+
+            <!-- 第一关：拼音匹配 -->
+            <div id="level-1" class="game-level">
+                <div class="level-header">
+                    <h2 class="level-title">第一关：生词和拼音匹配</h2>
+                    <div class="level-progress">题目: <span id="level1-progress">1/13</span></div>
+                </div>
+
+                <div class="question-container">
+                    <div class="question-header">
+                        <div class="question-title" id="level1-question-title">词语：<span id="current-word">传说</span>
+                        </div>
+                    </div>
+
+                    <div class="question-content">
+                        <div class="question-text">请选择正确的拼音：</div>
+                        <div class="options-container" id="level1-options">
+                            <!-- 选项会通过JavaScript动态生成 -->
+                        </div>
+
+                        <div class="feedback-container" id="level1-feedback">
+                            <!-- 反馈会通过JavaScript动态生成 -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="buttons-container">
+                    <button class="btn btn-secondary" id="back-to-map-1">
+                        <i class="fas fa-map"></i> 返回地图
+                    </button>
+                    <div class="control-buttons">
+                        <button class="btn btn-secondary btn-small" id="prev-level1" disabled>
+                            <i class="fas fa-arrow-left"></i> 上一题
+                        </button>
+                        <button class="btn btn-secondary btn-small" id="reset-level1" disabled>
+                            <i class="fas fa-redo"></i> 重新选择
+                        </button>
+                        <button class="btn btn-primary" id="next-level1" disabled>
+                            下一题 <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第二关：读句子选正确意思（找骆驼，不用图片） -->
+            <div id="level-2" class="game-level">
+                <div class="level-header">
+                    <h2 class="level-title">第二关：读句子选正确意思</h2>
+                    <div class="level-progress">题目: <span id="level2-progress">1/8</span></div>
+                </div>
+
+                <div class="question-container">
+                    <div class="question-header">
+                        <div class="question-title" id="level2-question-title">
+                            第 <span id="current-question-num">1</span> 题
+                        </div>
+                    </div>
+
+                    <div class="question-content">
+                        <!-- 提示文字改成“看句子选答案” -->
+                        <div class="question-text">
+                            请读一读下面的句子，选择合适的答案：
+                        </div>
+
+                        <!-- 原来放图片的容器，保留 id，让 JS 用它来放句子 -->
+                        <div class="image-display" id="level2-image-display">
+                            <!-- 句子会通过 JavaScript 动态生成 -->
+                        </div>
+
+                        <!-- 选项区域，保持不变 -->
+                        <div class="options-container" id="level2-options">
+                            <!-- 选项会通过 JavaScript 动态生成 -->
+                        </div>
+
+                        <!-- 反馈区域，保持不变 -->
+                        <div class="feedback-container" id="level2-feedback">
+                            <!-- 反馈会通过 JavaScript 动态生成 -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="buttons-container">
+                    <button class="btn btn-secondary" id="back-to-map-2">
+                        <i class="fas fa-map"></i> 返回地图
+                    </button>
+                    <div class="control-buttons">
+                        <button class="btn btn-secondary btn-small" id="prev-level2" disabled>
+                            <i class="fas fa-arrow-left"></i> 上一题
+                        </button>
+                        <button class="btn btn-secondary btn-small" id="reset-level2" disabled>
+                            <i class="fas fa-redo"></i> 重新选择
+                        </button>
+                        <button class="btn btn-primary" id="next-level2" disabled>
+                            下一题 <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- 第三关：选词填空 -->
+            <div id="level-3" class="game-level">
+                <div class="level-header">
+                    <h2 class="level-title">第三关：选词填空</h2>
+                    <div class="level-progress">题目: <span id="level3-progress">1/10</span></div>
+                </div>
+
+                <div class="question-container">
+                    <div class="question-header">
+                        <div class="question-title" id="level3-question-title">选词填空</div>
+                    </div>
+
+                    <div class="question-content">
+                        <div class="question-text" id="level3-sentence">你看，今晚的月亮又大又_____。</div>
+
+                        <div class="options-container" id="level3-options">
+                            <!-- 选项会通过JavaScript动态生成 -->
+                        </div>
+
+                        <div class="feedback-container" id="level3-feedback">
+                            <!-- 反馈会通过JavaScript动态生成 -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="buttons-container">
+                    <button class="btn btn-secondary" id="back-to-map-3">
+                        <i class="fas fa-map"></i> 返回地图
+                    </button>
+                    <div class="control-buttons">
+                        <button class="btn btn-secondary btn-small" id="prev-level3" disabled>
+                            <i class="fas fa-arrow-left"></i> 上一题
+                        </button>
+                        <button class="btn btn-secondary btn-small" id="reset-level3" disabled>
+                            <i class="fas fa-redo"></i> 重新选择
+                        </button>
+                        <button class="btn btn-primary" id="next-level3" disabled>
+                            下一题 <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 结果页面 -->
+            <div id="result-page" class="game-level result-container">
+                <div class="result-icon">
+                    <i class="fas fa-flag"></i>
+                </div>
+                <h2 class="result-title" id="result-title">恭喜完成所有关卡！</h2>
+                <div class="result-details">
+                    <h3>学习成果总结</h3>
+                    <p class="result-summary">通过三关挑战，您已经认识和理解了找骆驼相关的生词和知识：</p>
+
+                    <!-- 第一关：生词和拼音匹配（词汇） -->
+                    <div class="learned-item">
+                        <div class="learned-title">第一关 - 生词和拼音匹配</div>
+                        <div class="learned-words">我们学会了十三个常用词语的正确拼音：</div>
+                        <div class="learned-pinyin">• <span class="highlight-word">走丢</span> (zǒudiū)</div>
+                        <div class="learned-pinyin">• <span class="highlight-word">着急</span> (zhāojí)</div>
+                        <div class="learned-pinyin">• <span class="highlight-word">左脚</span> (zuǒjiǎo)</div>
+                        <div class="learned-pinyin">• <span class="highlight-word">背上</span> (bèishàng)</div>
+                        <div class="learned-pinyin">• <span class="highlight-word">蜜</span> (mì)</div>
+                        <div class="learned-pinyin">• <span class="highlight-word">米</span> (mǐ)</div>
+                        <div class="learned-pinyin">• <span class="highlight-word">牙齿</span> (yáchǐ)</div>
+                        <div class="learned-pinyin">• <span class="highlight-word">不慢</span> (bùmàn)</div>
+                        <div class="learned-pinyin">• <span class="highlight-word">生气</span> (shēngqì)</div>
+                        <div class="learned-pinyin">• <span class="highlight-word">刚才</span> (gāngcái)</div>
+                        <div class="learned-pinyin">• <span class="highlight-word">咬过</span> (yǎoguò)</div>
+                        <div class="learned-pinyin">• <span class="highlight-word">比较</span> (bǐjiào)</div>
+                        <div class="learned-pinyin">• <span class="highlight-word">指点</span> (zhǐdiǎn)</div>
+                    </div>
+
+                    <!-- 第二关：找骆驼小问答（阅读理解） -->
+                    <div class="learned-item">
+                        <div class="learned-title">第二关 - 找骆驼小问答</div>
+                        <div class="learned-words">我们通过回答问题，理解了找骆驼的故事：</div>
+                        <div class="learned-example">• 商人<span class="highlight-word">很着急</span>，找了好多地方问人</div>
+                        <div class="learned-example">• 老人<span class="highlight-word">不紧不慢</span>，通过<span
+                                class="highlight-word">脚印血迹</span>判断</div>
+                        <div class="learned-example">• 骆驼<span class="highlight-word">左脚受伤</span>，<span
+                                class="highlight-word">背上驮着蜜和米</span></div>
+                        <div class="learned-example">• 老人用智慧<span class="highlight-word">指点</span>商人找到骆驼</div>
+                    </div>
+
+                    <!-- 第三关：课文填空（找骆驼故事） -->
+                    <div class="learned-item">
+                        <div class="learned-title">第三关 - 根据课文内容填空</div>
+                        <div class="learned-words">我们通过填空，加深了对找骆驼故事的理解：</div>
+                        <div class="example-sentence">• 商人的<span class="example-word">骆驼走丢了</span>，他很<span
+                                class="example-word">着急</span>。</div>
+                        <div class="example-sentence">• 老人观察<span class="example-word">脚印</span>，发现<span
+                                class="example-word">左脚受伤</span>。</div>
+                        <div class="example-sentence">• 路边有<span class="example-word">蜜</span>和<span
+                                class="example-word">米</span>，树叶有<span class="example-word">牙齿印</span>。</div>
+                        <div class="example-sentence">• 商人<span class="example-word">顺着脚印</span>，按老人<span
+                                class="example-word">指点</span>找到了骆驼。</div>
+                    </div>
+                </div>
+
+                <div class="footer-note">
+                    🐪 愿你像智慧老人一样，<span class="highlight-word">善于观察</span>、<span class="highlight-word">勇于推理</span>、<span
+                        class="highlight-word">乐于助人</span>！
+                </div>
+
+            </div>
+            <button class="btn btn-success" id="restart-game">
+                <i class="fas fa-redo"></i> 重新开始游戏
+            </button>
+        </div>
+
+    </div>
+    </div>
+
+    <script>
+        // 游戏数据和状态
+        const gameData = {
+            currentLevel: 1,
+            levelCompleted: [false, false, false],
+
+            // 第一关：生词和拼音匹配（找骆驼）
+            level1: {
+                title: "找骆驼生词拼音匹配",
+                questions: [
+                    {
+                        word: "走丢",
+                        pinyin: "zǒudiū",
+                        options: ["zǒudiū", "zòudiū", "zǒudīu", "zǒuduī"]
+                    },
+                    {
+                        word: "着急",
+                        pinyin: "zhāojí",
+                        options: ["zhāojí", "zháojí", "zhāojī", "zhǎojí"]
+                    },
+                    {
+                        word: "左脚",
+                        pinyin: "zuǒjiǎo",
+                        options: ["zuǒjiǎo", "zuójiǎo", "zuǒjiāo", "zuǒjiáo"]
+                    },
+                    {
+                        word: "背上",
+                        pinyin: "bèishàng",
+                        options: ["bèishàng", "bèishǎng", "béishàng", "bèishāng"]
+                    },
+                    {
+                        word: "蜜",
+                        pinyin: "mì",
+                        options: ["mì", "mǐ", "mí", "mì"]
+                    },
+                    {
+                        word: "米",
+                        pinyin: "mǐ",
+                        options: ["mǐ", "mí", "mì", "mī"]
+                    },
+                    {
+                        word: "牙齿",
+                        pinyin: "yáchǐ",
+                        options: ["yáchǐ", "yá chǐ", "yǎchǐ", "yāchǐ"]
+                    },
+                    {
+                        word: "不慢",
+                        pinyin: "bùmàn",
+                        options: ["bùmàn", "bù màn", "bǔmàn", "bùmǎn"]
+                    },
+                    {
+                        word: "生气",
+                        pinyin: "shēngqì",
+                        options: ["shēngqì", "shéngqì", "shēngqí", "shēngqǐ"]
+                    },
+                    {
+                        word: "刚才",
+                        pinyin: "gāngcái",
+                        options: ["gāngcái", "gǎngcái", "gāngcái", "gāngcāi"]
+                    },
+                    {
+                        word: "咬过",
+                        pinyin: "yǎoguò",
+                        options: ["yǎoguò", "yàoguò", "yǎo guò", "yǎoguo"]
+                    },
+                    {
+                        word: "比较",
+                        pinyin: "bǐjiào",
+                        options: ["bǐjiào", "bíjiào", "bǐjiāo", "bǐjiáo"]
+                    },
+                    {
+                        word: "指点",
+                        pinyin: "zhǐdiǎn",
+                        options: ["zhǐdiǎn", "zhídiǎn", "zhǐdiān", "zhīdiǎn"]
+                    }
+                ],
+                currentQuestionIndex: 0,
+                userAnswers: Array(13).fill(null)
+            },
+
+            // 第二关：读句子选正确意思（句子形式，不用图片）
+            level2: {
+                title: "找骆驼小问答",
+                questions: [
+                    {
+                        sentence: "从故事开头哪个细节看出商人很着急？",
+                        correctAnswer: "找了好多地方，看见人就去问",
+                        options: [
+                            "找了好多地方，看见人就去问",
+                            "慢慢走路，不着急",
+                            "坐在家里等骆驼回来",
+                            "去吃饭不找了"
+                        ]
+                    },
+                    {
+                        sentence: "商人每次回答老人都是“是的是的、不错不错”，这表现了商人什么？",
+                        correctAnswer: "很着急",
+                        options: [
+                            "很着急",
+                            "很冷静",
+                            "很生气",
+                            "很开心"
+                        ]
+                    },
+                    {
+                        sentence: "老人把骆驼描述得非常具体正确，为什么却不知道骆驼在哪里？",
+                        correctAnswer: "他只观察了线索，没有看见骆驼离开的方向",
+                        options: [
+                            "他只观察了线索，没有看见骆驼离开的方向",
+                            "他把骆驼藏起来了",
+                            "他根本没看见骆驼",
+                            "他骗商人玩"
+                        ]
+                    },
+                    {
+                        sentence: "商人怀疑老人把骆驼藏起来，你觉得商人的怀疑有没有道理？",
+                        correctAnswer: "有道理，因为描述太详细了",
+                        options: [
+                            "有道理，因为描述太详细了",
+                            "没道理，老人很诚实",
+                            "不知道",
+                            "商人太笨了"
+                        ]
+                    },
+                    {
+                        sentence: "老人通过什么线索知道骆驼左脚受伤？",
+                        correctAnswer: "右脚印深，左脚印浅，左边有血迹",
+                        options: [
+                            "右脚印深，左脚印浅，左边有血迹",
+                            "骆驼叫了一声",
+                            "有人告诉他",
+                            "他猜的"
+                        ]
+                    },
+                    {
+                        sentence: "老人通过什么知道骆驼驮着蜜和米？",
+                        correctAnswer: "路左边有蜜，右边有米",
+                        options: [
+                            "路左边有蜜，右边有米",
+                            "骆驼身上有标签",
+                            "商人告诉他",
+                            "他闻到的"
+                        ]
+                    },
+                    {
+                        sentence: "老人怎么知道骆驼缺了一颗牙齿？",
+                        correctAnswer: "树叶上有牙齿印",
+                        options: [
+                            "树叶上有牙齿印",
+                            "骆驼张嘴给他看",
+                            "有人说的",
+                            "他随便猜的"
+                        ]
+                    },
+                    {
+                        sentence: "为什么商人自己找不到骆驼？",
+                        correctAnswer: "没有仔细观察脚印和线索",
+                        options: [
+                            "没有仔细观察脚印和线索",
+                            "骆驼藏得太好",
+                            "天太黑看不见",
+                            "骆驼跑得太快"
+                        ]
+                    }
+                ],
+                currentQuestionIndex: 0,
+                userAnswers: Array(8).fill(null)
+            },
+
+            // 第三关：小问答
+            level3: {
+                title: "找骆驼生词填空",
+                questions: [
+                    {
+                        sentence: "“马字旁”表示大型动物，_____也是马字旁，因为它是驮东西的大型动物。",
+                        correctAnswer: "骆驼",
+                        options: ["骆驼", "商人", "老人", "脚印"]
+                    },
+                    {
+                        sentence: "_____是从事买卖生意的人。",
+                        correctAnswer: "商人",
+                        options: ["商人", "骆驼", "学生", "老师"]
+                    },
+                    {
+                        sentence: "东西丢了就是_____，表示东西没了。",
+                        correctAnswer: "走丢",
+                        options: ["走丢", "走路", "走去", "走开"]
+                    },
+                    {
+                        sentence: "老人把骆驼描述得非常_____，连缺牙都知道。",
+                        correctAnswer: "详细",
+                        options: ["详细", "简单", "模糊", "错误"]
+                    },
+                    {
+                        sentence: "老人说话_____，一点也不着急。",
+                        correctAnswer: "不紧不慢",
+                        options: ["不紧不慢", "又快又急", "大声喊叫", "手舞足蹈"]
+                    },
+                    {
+                        sentence: "右脚印_____，左脚印浅，说明左脚受伤。",
+                        correctAnswer: "深",
+                        options: ["深", "浅", "直", "弯"]
+                    },
+                    {
+                        sentence: "左脚印旁边有_____，说明脚受伤了。",
+                        correctAnswer: "血迹",
+                        options: ["血迹", "脚印", "树叶", "蜜"]
+                    },
+                    {
+                        sentence: "树叶上有_____，说明骆驼缺了一颗牙。",
+                        correctAnswer: "牙齿印",
+                        options: ["牙齿印", "脚印", "血迹", "米粒"]
+                    },
+                    {
+                        sentence: "你要_____脚印去找骆驼。",
+                        correctAnswer: "顺着",
+                        options: ["顺着", "对着", "跳过", "擦掉"]
+                    },
+                    {
+                        sentence: "老人用智慧_____商人找到骆驼。",
+                        correctAnswer: "指点",
+                        options: ["指点", "捉弄", "抢走", "吃掉"]
+                    }
+                ],
+                currentQuestionIndex: 0,
+                userAnswers: Array(10).fill(null)
+            }
+        };
+
+
+        // DOM元素
+        const mapPage = document.getElementById('map-page');
+        const level1Page = document.getElementById('level-1');
+        const level2Page = document.getElementById('level-2');
+        const level3Page = document.getElementById('level-3');
+        const resultPage = document.getElementById('result-page');
+        const levelPoints = document.querySelectorAll('.level-point');
+        const levelCompleteOverlay = document.getElementById('level-complete-overlay');
+        const completeTitle = document.getElementById('complete-title');
+        const completeMessage = document.getElementById('complete-message');
+        const completeIcon = document.getElementById('complete-icon');
+        const continueButton = document.getElementById('continue-button');
+
+        // 检查是否已回答最少4题
+        function hasAnsweredMinimum(level, minRequired = 4) {
+            const answeredCount = level.userAnswers.filter(a => a !== null).length;
+            return answeredCount >= minRequired;
+        }
+
+        // 音效函数
+        function playCorrectSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime);
+                oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1);
+                oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2);
+
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+            } catch (e) {
+                console.log("音频播放失败，可能浏览器不支持");
+            }
+        }
+
+        function playWrongSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.frequency.setValueAtTime(392.00, audioContext.currentTime);
+                oscillator.frequency.setValueAtTime(349.23, audioContext.currentTime + 0.1);
+                oscillator.frequency.setValueAtTime(311.13, audioContext.currentTime + 0.2);
+
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+            } catch (e) {
+                console.log("音频播放失败，可能浏览器不支持");
+            }
+        }
+
+        function playCompleteSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime);
+                oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1);
+                oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2);
+                oscillator.frequency.setValueAtTime(1046.50, audioContext.currentTime + 0.3);
+
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.8);
+            } catch (e) {
+                console.log("音频播放失败，可能浏览器不支持");
+            }
+        }
+
+        // 初始化游戏
+        function initGame() {
+            updateLevelUnlock();
+            setupEventListeners();
+        }
+
+        // 更新关卡解锁状态
+        function updateLevelUnlock() {
+            levelPoints.forEach((point, index) => {
+                if (index === 0 || gameData.levelCompleted[index - 1]) {
+                    point.classList.remove('locked');
+                } else {
+                    point.classList.add('locked');
+                }
+            });
+        }
+
+        // 显示第一关题目
+        function showLevel1Question() {
+            const level = gameData.level1;
+            const currentIndex = level.currentQuestionIndex;
+            const question = level.questions[currentIndex];
+
+            document.getElementById('current-word').textContent = question.word;
+            document.getElementById('level1-progress').textContent = `${currentIndex + 1}/13`;
+
+            const optionsContainer = document.getElementById('level1-options');
+            optionsContainer.innerHTML = '';
+
+            const shuffledOptions = [...question.options].sort(() => Math.random() - 0.5);
+
+            shuffledOptions.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option pinyin-text';
+                optionElement.textContent = option;
+                optionElement.dataset.answer = option;
+
+                if (level.userAnswers[currentIndex] === option) {
+                    optionElement.classList.add('selected');
+                }
+
+                optionElement.addEventListener('click', handleLevel1OptionClick);
+                optionsContainer.appendChild(optionElement);
+            });
+
+            const feedback = document.getElementById('level1-feedback');
+            feedback.style.display = 'none';
+            feedback.className = 'feedback-container';
+
+            updateLevel1Buttons();
+        }
+
+        // 处理第一关选项点击
+        function handleLevel1OptionClick() {
+            const options = document.querySelectorAll('#level1-options .option');
+            options.forEach(option => {
+                option.classList.remove('selected');
+            });
+
+            this.classList.add('selected');
+
+            const answer = this.dataset.answer;
+            const currentIndex = gameData.level1.currentQuestionIndex;
+            gameData.level1.userAnswers[currentIndex] = answer;
+
+            checkLevel1Answer(answer);
+        }
+
+        // 检查第一关答案
+        function checkLevel1Answer(userAnswer) {
+            const level = gameData.level1;
+            const currentIndex = level.currentQuestionIndex;
+            const question = level.questions[currentIndex];
+            const options = document.querySelectorAll('#level1-options .option');
+
+            const feedback = document.getElementById('level1-feedback');
+
+            if (userAnswer === question.pinyin) {
+                options.forEach(option => {
+                    if (option.dataset.answer === userAnswer) {
+                        option.classList.add('correct');
+                    }
+                });
+
+                feedback.innerHTML = `
+                    <div class="feedback-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="feedback-text">回答正确！</div>
+                    <div class="pinyin-feedback">${question.word} 的拼音是 <span class="pinyin-text">${question.pinyin}</span></div>
+                `;
+                feedback.className = 'feedback-container feedback-correct';
+                feedback.style.display = 'block';
+
+                playCorrectSound();
+            } else {
+                options.forEach(option => {
+                    if (option.dataset.answer === userAnswer) {
+                        option.classList.add('wrong');
+                    }
+                    if (option.dataset.answer === question.pinyin) {
+                        option.classList.add('correct');
+                    }
+                });
+
+                feedback.innerHTML = `
+                    <div class="feedback-icon"><i class="fas fa-times-circle"></i></div>
+                    <div class="feedback-text">回答错误。</div>
+                    <div class="pinyin-feedback">${question.word} 的正确拼音是 <span class="pinyin-text">${question.pinyin}</span></div>
+                `;
+                feedback.className = 'feedback-container feedback-wrong';
+                feedback.style.display = 'block';
+
+                playWrongSound();
+            }
+
+            updateLevel1Buttons();
+        }
+
+        // 更新第一关按钮状态
+        function updateLevel1Buttons() {
+            const level = gameData.level1;
+            const currentIndex = level.currentQuestionIndex;
+
+            document.getElementById('prev-level1').disabled = currentIndex === 0;
+            document.getElementById('reset-level1').disabled = level.userAnswers[currentIndex] === null;
+            document.getElementById('next-level1').disabled = level.userAnswers[currentIndex] === null;
+        }
+
+        // 显示第二关题目（改为文字句子，不再显示图片）
+        function showLevel2Question() {
+            const level = gameData.level2;
+            const currentIndex = level.currentQuestionIndex;
+            const question = level.questions[currentIndex];
+
+            // 进度
+            document.getElementById('level2-progress').textContent = `${currentIndex + 1}/8`;
+            document.getElementById('current-question-num').textContent = currentIndex + 1;
+
+            // 原来的图片区域，现在用来显示句子
+            const imageDisplay = document.getElementById('level2-image-display');
+            imageDisplay.innerHTML = '';
+
+            const sentenceContainer = document.createElement('div');
+            sentenceContainer.className = 'level2-sentence-container';
+
+            const sentenceElement = document.createElement('div');
+            sentenceElement.id = 'level2-sentence';
+            sentenceElement.className = 'level2-sentence';
+            sentenceElement.textContent = question.sentence;
+
+            sentenceContainer.appendChild(sentenceElement);
+            imageDisplay.appendChild(sentenceContainer);
+
+            // 生成选项
+            const optionsContainer = document.getElementById('level2-options');
+            optionsContainer.innerHTML = '';
+
+            const shuffledOptions = [...question.options].sort(() => Math.random() - 0.5);
+
+            shuffledOptions.forEach((option) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.textContent = option;
+                optionElement.dataset.answer = option;
+
+                if (level.userAnswers[currentIndex] === option) {
+                    optionElement.classList.add('selected');
+                }
+
+                optionElement.addEventListener('click', handleLevel2OptionClick);
+                optionsContainer.appendChild(optionElement);
+            });
+
+            const feedback = document.getElementById('level2-feedback');
+            feedback.style.display = 'none';
+            feedback.className = 'feedback-container';
+
+            updateLevel2Buttons();
+        }
+
+        // 处理第二关选项点击
+        function handleLevel2OptionClick() {
+            const options = document.querySelectorAll('#level2-options .option');
+            options.forEach(option => {
+                option.classList.remove('selected');
+            });
+
+            this.classList.add('selected');
+
+            const answer = this.dataset.answer;
+            const currentIndex = gameData.level2.currentQuestionIndex;
+            gameData.level2.userAnswers[currentIndex] = answer;
+
+            checkLevel2Answer(answer);
+        }
+
+        // 检查第二关答案（句子 + 正确解释）
+        function checkLevel2Answer(userAnswer) {
+            const level = gameData.level2;
+            const currentIndex = level.currentQuestionIndex;
+            const question = level.questions[currentIndex];
+            const options = document.querySelectorAll('#level2-options .option');
+
+            const feedback = document.getElementById('level2-feedback');
+
+            if (userAnswer === question.correctAnswer) {
+                // 标记选中的选项为正确
+                options.forEach(option => {
+                    if (option.dataset.answer === userAnswer) {
+                        option.classList.add('correct');
+                    }
+                });
+
+                feedback.innerHTML = `
+            <div class="feedback-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="feedback-text">
+                回答正确！正确意思是：${question.correctAnswer}
+            </div>
+        `;
+                feedback.className = 'feedback-container feedback-correct';
+                feedback.style.display = 'block';
+
+                playCorrectSound();
+            } else {
+                // 标记错题和正确答案
+                options.forEach(option => {
+                    if (option.dataset.answer === userAnswer) {
+                        option.classList.add('wrong');
+                    }
+                    if (option.dataset.answer === question.correctAnswer) {
+                        option.classList.add('correct');
+                    }
+                });
+
+                feedback.innerHTML = `
+            <div class="feedback-icon"><i class="fas fa-times-circle"></i></div>
+            <div class="feedback-text">
+                回答错误。正确答案是：${question.correctAnswer}
+            </div>
+        `;
+                feedback.className = 'feedback-container feedback-wrong';
+                feedback.style.display = 'block';
+
+                playWrongSound();
+            }
+
+            updateLevel2Buttons();
+        }
+
+        // 更新第二关按钮状态（这一段原样保留即可）
+        function updateLevel2Buttons() {
+            const level = gameData.level2;
+            const currentIndex = level.currentQuestionIndex;
+
+            document.getElementById('prev-level2').disabled = currentIndex === 0;
+            document.getElementById('reset-level2').disabled = level.userAnswers[currentIndex] === null;
+            document.getElementById('next-level2').disabled = level.userAnswers[currentIndex] === null;
+        }
+
+
+        // 显示第三关题目
+        function showLevel3Question() {
+            const level = gameData.level3;
+            const currentIndex = level.currentQuestionIndex;
+            const question = level.questions[currentIndex];
+
+            document.getElementById('level3-progress').textContent = `${currentIndex + 1}/10`;
+            document.getElementById('level3-sentence').textContent = question.sentence;
+
+            const optionsContainer = document.getElementById('level3-options');
+            optionsContainer.innerHTML = '';
+
+            const shuffledOptions = [...question.options].sort(() => Math.random() - 0.5);
+
+            shuffledOptions.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.textContent = option;
+                optionElement.dataset.answer = option;
+
+                if (level.userAnswers[currentIndex] === option) {
+                    optionElement.classList.add('selected');
+                }
+
+                optionElement.addEventListener('click', handleLevel3OptionClick);
+                optionsContainer.appendChild(optionElement);
+            });
+
+            const feedback = document.getElementById('level3-feedback');
+            feedback.style.display = 'none';
+            feedback.className = 'feedback-container';
+
+            updateLevel3Buttons();
+        }
+
+        // 处理第三关选项点击
+        function handleLevel3OptionClick() {
+            const options = document.querySelectorAll('#level3-options .option');
+            options.forEach(option => {
+                option.classList.remove('selected');
+            });
+
+            this.classList.add('selected');
+
+            const answer = this.dataset.answer;
+            const currentIndex = gameData.level3.currentQuestionIndex;
+            gameData.level3.userAnswers[currentIndex] = answer;
+
+            checkLevel3Answer(answer);
+        }
+
+        // 检查第三关答案
+        function checkLevel3Answer(userAnswer) {
+            const level = gameData.level3;
+            const currentIndex = level.currentQuestionIndex;
+            const question = level.questions[currentIndex];
+            const options = document.querySelectorAll('#level3-options .option');
+
+            const feedback = document.getElementById('level3-feedback');
+
+            if (userAnswer === question.correctAnswer) {
+                options.forEach(option => {
+                    if (option.dataset.answer === userAnswer) {
+                        option.classList.add('correct');
+                    }
+                });
+
+                feedback.innerHTML = `
+                    <div class="feedback-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="feedback-text">回答正确！句子应该填：${question.correctAnswer}</div>
+                `;
+                feedback.className = 'feedback-container feedback-correct';
+                feedback.style.display = 'block';
+
+                playCorrectSound();
+            } else {
+                options.forEach(option => {
+                    if (option.dataset.answer === userAnswer) {
+                        option.classList.add('wrong');
+                    }
+                    if (option.dataset.answer === question.correctAnswer) {
+                        option.classList.add('correct');
+                    }
+                });
+
+                feedback.innerHTML = `
+                    <div class="feedback-icon"><i class="fas fa-times-circle"></i></div>
+                    <div class="feedback-text">回答错误。句子的正确答案是：${question.correctAnswer}</div>
+                `;
+                feedback.className = 'feedback-container feedback-wrong';
+                feedback.style.display = 'block';
+
+                playWrongSound();
+            }
+
+            updateLevel3Buttons();
+        }
+
+        // 更新第三关按钮状态
+        function updateLevel3Buttons() {
+            const level = gameData.level3;
+            const currentIndex = level.currentQuestionIndex;
+
+            document.getElementById('prev-level3').disabled = currentIndex === 0;
+            document.getElementById('reset-level3').disabled = level.userAnswers[currentIndex] === null;
+            document.getElementById('next-level3').disabled = level.userAnswers[currentIndex] === null;
+        }
+
+        // 显示页面
+        function showPage(page) {
+            mapPage.style.display = 'none';
+            level1Page.style.display = 'none';
+            level2Page.style.display = 'none';
+            level3Page.style.display = 'none';
+            resultPage.style.display = 'none';
+
+            page.style.display = 'block';
+        }
+
+        // 显示地图页面
+        function showMapPage() {
+            showPage(mapPage);
+        }
+
+        // 显示第一关页面
+        function showLevel1Page() {
+            showLevel1Question();
+            showPage(level1Page);
+        }
+
+        // 显示第二关页面
+        function showLevel2Page() {
+            showLevel2Question();
+            showPage(level2Page);
+        }
+
+        // 显示第三关页面
+        function showLevel3Page() {
+            showLevel3Question();
+            showPage(level3Page);
+        }
+
+        // 重置当前题目选择
+        function resetCurrentQuestion() {
+            const levelNum = gameData.currentLevel;
+            let level;
+
+            if (levelNum === 1) {
+                level = gameData.level1;
+            } else if (levelNum === 2) {
+                level = gameData.level2;
+            } else {
+                level = gameData.level3;
+            }
+
+            const currentIndex = level.currentQuestionIndex;
+            level.userAnswers[currentIndex] = null;
+
+            if (levelNum === 1) {
+                showLevel1Question();
+            } else if (levelNum === 2) {
+                showLevel2Question();
+            } else {
+                showLevel3Question();
+            }
+        }
+
+        // 显示关卡完成提示
+        function showLevelComplete(levelNum) {
+            let title, message, iconClass;
+
+            switch (levelNum) {
+                case 1:
+                    title = "恭喜完成第一关！";
+                    message = "您已成功掌握四个词语的正确拼音！可以进入下一关了！";
+                    iconClass = "fas fa-language";
+                    break;
+                case 2:
+                    title = "恭喜完成第二关！";
+                    message = "您已成功通过本周阅读理解！可以进入最后一关了！";
+                    iconClass = "fas fa-images";
+                    break;
+                case 3:
+                    title = "恭喜完成第三关！";
+                    message = "您已成功学会在句子中正确使用这些词语！所有关卡都已完成！";
+                    iconClass = "fas fa-edit";
+                    break;
+            }
+
+            completeTitle.textContent = title;
+            completeMessage.textContent = message;
+            completeIcon.innerHTML = `<i class="${iconClass}"></i>`;
+
+            if (levelNum === 3) {
+                continueButton.innerHTML = `<i class="fas fa-award"></i> 查看学习成果`;
+            } else {
+                continueButton.innerHTML = `<i class="fas fa-arrow-right"></i> 继续下一关`;
+            }
+
+            levelCompleteOverlay.style.display = 'flex';
+
+            playCompleteSound();
+        }
+
+        // 处理第一关下一题
+        function handleLevel1Next() {
+            const level = gameData.level1;
+
+            level.currentQuestionIndex++;
+
+            if (level.currentQuestionIndex < level.questions.length) {
+                showLevel1Question();
+            } else {
+                // ✅ Only complete the level if 4 or more answers are provided
+                if (hasAnsweredMinimum(level, 4)) {
+                    gameData.levelCompleted[0] = true;
+                    updateLevelUnlock();
+                    showLevelComplete(1);
+                } else {
+                    alert("请至少回答4道题目才能进入下一关！");
+                }
+
+                level.currentQuestionIndex = 0;
+            }
+        }
+
+        // 处理第一关上一题
+        function handleLevel1Prev() {
+            const level = gameData.level1;
+            if (level.currentQuestionIndex > 0) {
+                level.currentQuestionIndex--;
+                showLevel1Question();
+            }
+        }
+
+        // 处理第二关下一题
+        function handleLevel2Next() {
+            const level = gameData.level2;
+            level.currentQuestionIndex++;
+
+            if (level.currentQuestionIndex < level.questions.length) {
+                showLevel2Question();
+            } else {
+                gameData.levelCompleted[1] = true;
+                updateLevelUnlock();
+
+                showLevelComplete(2);
+
+                level.currentQuestionIndex = 0;
+            }
+        }
+
+        // 处理第二关上一题
+        function handleLevel2Prev() {
+            const level = gameData.level2;
+            if (level.currentQuestionIndex > 0) {
+                level.currentQuestionIndex--;
+                showLevel2Question();
+            }
+        }
+
+        // 处理第三关下一题
+        function handleLevel3Next() {
+            const level = gameData.level3;
+            level.currentQuestionIndex++;
+
+            if (level.currentQuestionIndex < level.questions.length) {
+                showLevel3Question();
+            } else {
+                gameData.levelCompleted[2] = true;
+
+                showLevelComplete(3);
+
+                level.currentQuestionIndex = 0;
+            }
+        }
+
+        // 处理第三关上一题
+        function handleLevel3Prev() {
+            const level = gameData.level3;
+            if (level.currentQuestionIndex > 0) {
+                level.currentQuestionIndex--;
+                showLevel3Question();
+            }
+        }
+
+        // 显示最终结果
+        function showFinalResult() {
+            showPage(resultPage);
+        }
+
+        // 重置游戏
+        function resetGame() {
+            gameData.currentLevel = 1;
+            gameData.levelCompleted = [false, false, false];
+
+            gameData.level1.currentQuestionIndex = 0;
+            gameData.level1.userAnswers = [null, null, null, null];
+
+            gameData.level2.currentQuestionIndex = 0;
+            gameData.level2.userAnswers = [null, null, null, null];
+
+            gameData.level3.currentQuestionIndex = 0;
+            gameData.level3.userAnswers = [null, null, null, null];
+
+            updateLevelUnlock();
+            showMapPage();
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            levelPoints.forEach((point, index) => {
+                point.addEventListener('click', function () {
+                    if (this.classList.contains('locked')) return;
+
+                    gameData.currentLevel = index + 1;
+
+                    switch (index) {
+                        case 0:
+                            showLevel1Page();
+                            break;
+                        case 1:
+                            showLevel2Page();
+                            break;
+                        case 2:
+                            showLevel3Page();
+                            break;
+                    }
+                });
+            });
+
+            document.getElementById('back-to-map-1').addEventListener('click', showMapPage);
+            document.getElementById('back-to-map-2').addEventListener('click', showMapPage);
+            document.getElementById('back-to-map-3').addEventListener('click', showMapPage);
+
+            document.getElementById('next-level1').addEventListener('click', handleLevel1Next);
+            document.getElementById('next-level2').addEventListener('click', handleLevel2Next);
+            document.getElementById('next-level3').addEventListener('click', handleLevel3Next);
+
+            document.getElementById('prev-level1').addEventListener('click', handleLevel1Prev);
+            document.getElementById('prev-level2').addEventListener('click', handleLevel2Prev);
+            document.getElementById('prev-level3').addEventListener('click', handleLevel3Prev);
+
+            document.getElementById('reset-level1').addEventListener('click', resetCurrentQuestion);
+            document.getElementById('reset-level2').addEventListener('click', resetCurrentQuestion);
+            document.getElementById('reset-level3').addEventListener('click', resetCurrentQuestion);
+
+            document.getElementById('restart-game').addEventListener('click', resetGame);
+
+            continueButton.addEventListener('click', function () {
+                levelCompleteOverlay.style.display = 'none';
+
+                if (gameData.currentLevel === 3) {
+                    showFinalResult();
+                } else {
+                    showMapPage();
+                }
+            });
+
+            levelCompleteOverlay.addEventListener('click', function (e) {
+                if (e.target === this) {
+                    this.style.display = 'none';
+                }
+            });
+        }
+
+        // 初始化游戏
+        document.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+
+</html>
