@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>岳飞学写字 🌿 句子重排</title>
+    <style>
+        /* Background Ocean + Tree branch atmosphere */
+        body {
+            background: linear-gradient(135deg, #66b2e6 0%, #0092d3 50%, #005b99 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #fff;
+            font-family: "Microsoft Yahei", system-ui, BlinkMacSystemFont, "Segoe UI",
+                sans-serif;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(ellipse 15% 8% at 25% 75%, rgba(160, 82, 45, 0.1) 0%, transparent 50%),
+                radial-gradient(circle 6% at 75% 35%, rgba(139, 69, 19, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 900px;
+            background-color: rgba(255, 255, 255, 0.06);
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .game-header {
+            background: linear-gradient(to right, #0077b6, #005b99);
+            color: #ffe08a;
+            text-align: center;
+            padding: 25px 30px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.4);
+            position: relative;
+        }
+
+        .game-header h1 {
+            font-size: 2.2rem;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .game-header p {
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .branch-decoration {
+            position: absolute;
+            width: 70px;
+            height: 50px;
+            top: 18px;
+            right: 25px;
+        }
+
+        .branch-main {
+            width: 50px;
+            height: 16px;
+            background: linear-gradient(145deg, #8b4513, #654321);
+            border-radius: 8px;
+            position: absolute;
+            bottom: 0;
+            right: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+        }
+
+        .branch-leaf {
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(ellipse, #90ee90 40%, #228b22 80%);
+            border-radius: 50% 30% 70% 30%;
+            position: absolute;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .leaf1 {
+            top: -10px;
+            left: 10px;
+        }
+
+        .leaf2 {
+            top: -8px;
+            right: -3px;
+        }
+
+        /* FIXED: Much more opaque dropdown menu */
+        .dropdown-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+
+        .dropbtn {
+            background-color: rgba(0, 0, 0, 0.4);
+            color: #ffe08a;
+            font-size: 22px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            padding: 6px 10px;
+            transition: background 0.3s ease;
+        }
+
+        .dropbtn:hover {
+            background-color: rgba(0, 0, 0, 0.6);
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            /* FIXED: Much more opaque background */
+            background-color: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(15px);
+            min-width: 200px;
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.6);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-top: 8px;
+            z-index: 1000;
+            padding: 4px 0;
+        }
+
+        .dropdown-content a {
+            color: #ffe08a;
+            padding: 14px 20px;
+            text-decoration: none;
+            display: block;
+            transition: all 0.2s ease;
+            font-size: 0.95rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .dropdown-content a:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-content a:hover {
+            background: rgba(255, 235, 138, 0.3);
+            color: #fff;
+            padding-left: 24px;
+            transform: translateX(4px);
+        }
+
+        .dropdown-content a.active {
+            background: rgba(255, 235, 59, 0.4);
+            font-weight: bold;
+        }
+
+        .show {
+            display: block;
+        }
+
+        .main-content {
+            padding: 30px 30px 35px;
+        }
+
+        .instruction {
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        .target-sentence {
+            margin: 10px 0 20px;
+            padding: 12px 15px;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 12px;
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .game-area {
+            margin-top: 15px;
+        }
+
+        .word-container {
+            min-height: 70px;
+            border-radius: 12px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .word {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 12px;
+            min-width: 40px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            cursor: move;
+            user-select: none;
+            font-size: 1.1rem;
+            color: #ffe08a;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+
+        .word.dragging {
+            opacity: 0.7;
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 22px;
+            font-size: 1rem;
+            color: #005b99;
+            background-color: #ffe08a;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s ease, background 0.3s ease, box-shadow 0.3s ease;
+            font-weight: bold;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            background-color: #fff59d;
+            box-shadow: 0 6px 16px rgba(255, 234, 138, 0.5);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        #message {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 1rem;
+            min-height: 1.5em;
+        }
+
+        #message.correct {
+            color: #c8ffb0;
+        }
+
+        #message.wrong {
+            color: #ffebee;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <div class="dropdown-container">
+                <button class="dropbtn">☰</button>
+                <div class="dropdown-content">
+                    <a href="read.html">📖 阅读</a>
+                    <a href="wordice.html">🎲 字卡骰子</a>
+                    <a href="splice.html" class="active">🧩 句子拼图</a>
+                    <a href="connect4_prev.html">🎮听写(上) Connect 4</a>
+                    <a href="quiz_prev.html">⚡ 闯关游戏（上）</a>
+                    <a href="quiz.html">⚡ 闯关游戏（下）</a>
+                    <a href="connect4.html">🎮听写（下）Connect 4</a>
+                </div>
+            </div>
+            <h1>🌿 岳飞学写字 · 句子拼图</h1>
+            <p>拖动字卡，按顺序拼出完整句子。</p>
+
+            <div class="branch-decoration">
+                <div class="branch-main"></div>
+                <div class="branch-leaf leaf1"></div>
+                <div class="branch-leaf leaf2"></div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="instruction">
+                目标句子：
+            </div>
+            <div class="target-sentence">
+                岳飞对母亲说：“妈妈，您做我的老师，教我读书写字，好不好？”
+            </div>
+
+            <div class="game-area">
+                <p>请拖拽下面打乱顺序的字卡，重新排成上面的完整句子。</p>
+                <div class="word-container" id="wordContainer">
+                    <!-- tiles will be injected by JS -->
+                </div>
+
+                <div class="controls">
+                    <button id="checkBtn">检查顺序</button>
+                    <button id="resetBtn">重新打乱 🔀</button>
+                </div>
+                <div id="message"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Target sentence split into tiles
+        const correctOrder = [
+            "岳飞", "对", "母亲", "说", "：", "”", "妈妈", "，", "您", "做", "我", "的", "老师", "，",
+            "教", "我", "读书", "写字", "，", "好不好", "？", "”"
+        ];
+
+        let currentOrder = [];
+
+        const container = document.getElementById('wordContainer');
+        const messageEl = document.getElementById('message');
+
+        // 🎵 Sound effects using Web Audio API
+        function playTileMoveSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+
+            osc.frequency.setValueAtTime(400, audioContext.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.1);
+            osc.type = 'sine';
+
+            gain.gain.setValueAtTime(0.2, audioContext.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+
+            osc.start(audioContext.currentTime);
+            osc.stop(audioContext.currentTime + 0.1);
+        }
+
+        function playShuffleSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+            const rattleNotes = [
+                { freq: 220, duration: 0.03 },
+                { freq: 200, duration: 0.04 },
+                { freq: 240, duration: 0.03 },
+                { freq: 180, duration: 0.05 },
+                { freq: 260, duration: 0.04 },
+                { freq: 210, duration: 0.06 }
+            ];
+
+            let time = 0;
+            rattleNotes.forEach(note => {
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+
+                osc.frequency.value = note.freq;
+                osc.type = 'square';
+
+                gain.gain.setValueAtTime(0.25, audioContext.currentTime + time);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + time + note.duration);
+
+                osc.start(audioContext.currentTime + time);
+                osc.stop(audioContext.currentTime + time + note.duration);
+
+                time += note.duration * 1.1;
+            });
+        }
+
+        function playCheckSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+            [800, 1000].forEach((freq, i) => {
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+
+                osc.frequency.value = freq;
+                osc.type = 'square';
+
+                gain.gain.setValueAtTime(0.15, audioContext.currentTime + i * 0.1);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + i * 0.1 + 0.08);
+
+                osc.start(audioContext.currentTime + i * 0.1);
+                osc.stop(audioContext.currentTime + i * 0.1 + 0.08);
+            });
+        }
+
+        function playSuccessSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+            const notes = [523, 659, 784];
+            notes.forEach((freq, i) => {
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+
+                osc.frequency.value = freq;
+                osc.type = 'sine';
+
+                gain.gain.setValueAtTime(0.2, audioContext.currentTime + i * 0.15);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + i * 0.15 + 0.3);
+
+                osc.start(audioContext.currentTime + i * 0.15);
+                osc.stop(audioContext.currentTime + i * 0.15 + 0.3);
+            });
+        }
+
+        function playErrorSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+
+            osc.frequency.setValueAtTime(300, audioContext.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(150, audioContext.currentTime + 0.2);
+            osc.type = 'sawtooth';
+
+            gain.gain.setValueAtTime(0.15, audioContext.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+
+            osc.start(audioContext.currentTime);
+            osc.stop(audioContext.currentTime + 0.2);
+        }
+
+        function shuffle(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function initGame() {
+            messageEl.textContent = "";
+            messageEl.className = "";
+            currentOrder = shuffle(correctOrder);
+            renderTiles();
+        }
+
+        function renderTiles() {
+            container.innerHTML = "";
+            currentOrder.forEach((chunk, index) => {
+                const tile = document.createElement('div');
+                tile.className = 'word';
+                tile.draggable = true;
+                tile.textContent = chunk;
+                tile.dataset.index = index;
+
+                tile.addEventListener('dragstart', onDragStart);
+                tile.addEventListener('dragend', onDragEnd);
+                tile.addEventListener('dragover', onDragOver);
+                tile.addEventListener('drop', onDrop);
+
+                container.appendChild(tile);
+            });
+        }
+
+        let draggedIndex = null;
+
+        function onDragStart(e) {
+            draggedIndex = Number(e.target.dataset.index);
+            e.target.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            playTileMoveSound();
+        }
+
+        function onDragEnd(e) {
+            e.target.classList.remove('dragging');
+            draggedIndex = null;
+        }
+
+        function onDragOver(e) {
+            e.preventDefault();
+            const target = e.currentTarget;
+            const targetIndex = Number(target.dataset.index);
+            if (draggedIndex === null || draggedIndex === targetIndex) return;
+
+            const moved = currentOrder.splice(draggedIndex, 1)[0];
+            currentOrder.splice(targetIndex, 0, moved);
+            draggedIndex = targetIndex;
+            renderTiles();
+            playTileMoveSound();
+        }
+
+        function onDrop(e) {
+            e.preventDefault();
+        }
+
+        function checkOrder() {
+            playCheckSound();
+
+            const isCorrect = currentOrder.length === correctOrder.length &&
+                currentOrder.every((chunk, i) => chunk === correctOrder[i]);
+
+            setTimeout(() => {
+                if (isCorrect) {
+                    playSuccessSound();
+                    messageEl.textContent = "✅ 正确！顺序完美！";
+                    messageEl.className = "correct";
+                } else {
+                    playErrorSound();
+                    messageEl.textContent = "❌ 顺序不对，请再试一次。";
+                    messageEl.className = "wrong";
+                }
+            }, 150);
+        }
+
+        document.getElementById('checkBtn').addEventListener('click', checkOrder);
+        document.getElementById('resetBtn').addEventListener('click', function () {
+            playShuffleSound();
+            setTimeout(initGame, 300);
+        });
+
+        // Dropdown functionality
+        document.querySelector(".dropbtn").addEventListener("click", function () {
+            document.querySelector(".dropdown-content").classList.toggle("show");
+        });
+
+        window.addEventListener("click", function (event) {
+            if (!event.target.matches(".dropbtn")) {
+                const dropdowns = document.querySelectorAll(".dropdown-content");
+                dropdowns.forEach((dropdown) => {
+                    if (dropdown.classList.contains("show")) {
+                        dropdown.classList.remove("show");
+                    }
+                });
+            }
+        });
+
+        // Start
+        initGame();
+    </script>
+</body>
+
+</html>
