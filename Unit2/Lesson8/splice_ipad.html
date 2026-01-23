@@ -491,9 +491,7 @@ function renderTiles() {
         
         if (isTouchDevice) {
             // 📱 iPad: 触摸事件
-            tile.addEventListener('touchstart', (e) => onTouchStart(e, index), { passive: false });
-            tile.addEventListener('touchmove', onTouchMove, { passive: false });
-            tile.addEventListener('touchend', onTouchEnd, { passive: false });
+            setupTileEvents(tile, index);
         } else {
             // 🖱️ MacBook/PC: 原生拖拽（你原来的代码，完全不变）
             tile.draggable = true;
@@ -506,8 +504,6 @@ function renderTiles() {
         container.appendChild(tile);
     });
 }
-
-
         function setupTileEvents(tile, index) {
             // 桌面拖放
             tile.draggable = true;
