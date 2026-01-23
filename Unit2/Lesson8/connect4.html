@@ -361,7 +361,22 @@
         let currentPlayer = 'red';
         let boardState = [];
         let gameOver = false;
+// iPad Safari 音频修复
+let audioUnlocked = false;
 
+function unlockAudio() {
+    if (audioUnlocked) return;
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    osc.connect(gain);
+    gain.connect(audioContext.destination);
+    osc.frequency.value = 0;
+    gain.gain.setValueAtTime(0, audioContext.currentTime);
+    osc.start();
+    osc.stop(audioContext.currentTime + 0.01);
+    audioUnlocked = true;
+}
         // Function to shuffle the pool and pick 42 words
         function getRandomWords() {
             let shuffled = [...WORD_POOL].sort(() => 0.5 - Math.random());
@@ -390,6 +405,10 @@ function initBoard() {
         }
 
         function handleMove(r, c) {
+            if (!audioUnlocked) {
+               unlockAudio();
+               return;
+            }
             if (gameOver || boardState[r][c]) return;
 
             // 🎵 NEW: Play drop sound when piece is placed
@@ -491,7 +510,10 @@ function initBoard() {
                 { freq: 659, duration: 0.4 },  // E5  
                 { freq: 784, duration: 0.8 }   // G5
             ];
-
+            if (!audioUnlocked) {
+               unlockAudio();
+               return;
+            }
             let time = 0;
             notes.forEach(note => {
                 const osc = audioContext.createOscillator();
@@ -533,6 +555,9 @@ function initBoard() {
                 }
             }, 800);
         }
+        
+        document.addEventListener('touchstart', unlockAudio, { once: true });
+        document.addEventListener('click', unlockAudio, { once: true });
         // Dropdown functionality
         document.querySelector(".dropbtn").addEventListener("click", function () {
             document.querySelector(".dropdown-content").classList.toggle("show");
