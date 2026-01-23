@@ -389,17 +389,34 @@
         renderTiles();
     }
 
-    function renderTiles() {
-        container.innerHTML = "";
-        currentOrder.forEach((chunk, index) => {
-            const tile = document.createElement('div');
-            tile.className = 'word';
-            tile.textContent = chunk;
-            tile.dataset.index = index;
-            setupTileEvents(tile, index);
-            container.appendChild(tile);
-        });
-    }
+function renderTiles() {
+    container.innerHTML = "";
+    currentOrder.forEach((chunk, index) => {
+        const tile = document.createElement('div');
+        tile.className = 'word';
+        tile.textContent = chunk;
+        tile.dataset.index = index;
+
+        // 🖥️ 检测是否触摸设备
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        
+        if (isTouchDevice) {
+            // 📱 iPad: 触摸事件
+            tile.addEventListener('touchstart', (e) => onTouchStart(e, index), { passive: false });
+            tile.addEventListener('touchmove', onTouchMove, { passive: false });
+            tile.addEventListener('touchend', onTouchEnd, { passive: false });
+        } else {
+            // 🖱️ MacBook/PC: 原生拖拽（你原来的代码，完全不变）
+            tile.draggable = true;
+            tile.addEventListener('dragstart', onDragStart);
+            tile.addEventListener('dragend', onDragEnd);
+            tile.addEventListener('dragover', onDragOver);
+            tile.addEventListener('drop', onDrop);
+        }
+        
+        container.appendChild(tile);
+    });
+}
 
     // 🖱️ MacBook 原生拖拽（保持不变）
     function onDragStart(e, index) {
