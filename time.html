@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>光阴悄悄流逝 - 故事与感悟</title>
+    <style>
+        body {
+            /* 安静时间主题：深蓝到紫的渐变，像傍晚的天空 */
+            background: linear-gradient(135deg, #0b1020 0%, #1e2a3f 40%, #3c355a 75%, #5f4b8b 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #f5f5f5;
+            overflow-x: hidden;
+            font-family: "Microsoft Yahei", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 1000px;
+            background: radial-gradient(circle at top, rgba(255, 255, 255, 0.08), rgba(10, 15, 30, 0.95));
+            border-radius: 25px;
+            box-shadow:
+                0 18px 40px rgba(0, 0, 0, 0.7),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            overflow: hidden;
+            position: relative;
+            border: 2px solid rgba(255, 215, 160, 0.6);
+            backdrop-filter: blur(10px);
+        }
+
+        .game-header {
+            background: linear-gradient(to right, #1b2940, #273654, #3f4f73);
+            color: #ffebc3;
+            padding: 25px 30px 18px;
+            text-align: center;
+            position: relative;
+            border-bottom: 2px solid rgba(255, 235, 200, 0.5);
+        }
+
+        .game-header h1 {
+            font-size: 2.4rem;
+            margin-bottom: 8px;
+            text-shadow: 0 0 14px rgba(0, 0, 0, 0.7);
+            letter-spacing: 2px;
+        }
+
+        .game-header p {
+            font-size: 1.05rem;
+            opacity: 0.9;
+            max-width: 720px;
+            margin: 0 auto 4px;
+            color: #ffe9b0;
+        }
+
+        .game-header .subtitle {
+            font-size: 0.95rem;
+            color: #ffd27f;
+            opacity: 0.95;
+            margin-top: 4px;
+        }
+.clock-decoration {
+    position: absolute;
+    width: 70px;
+    height: 70px;
+    top: 18px;
+    right: 30px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #fff8e1 30%, #f6d093 65%, #cfa15a 100%);
+    box-shadow:
+        0 0 18px rgba(255, 223, 170, 0.9),
+        0 0 35px rgba(255, 223, 170, 0.5);
+}
+
+.clock-inner {
+    position: absolute;
+    inset: 10px;
+    border-radius: 50%;
+    border: 2px solid rgba(120, 85, 40, 0.6);
+    background: radial-gradient(circle, #fffdf5 40%, #f7e3be 100%);
+}
+
+/* Hour hand (thick, short) */
+.clock-hand.hour {
+    position: absolute;
+    width: 3px;
+    height: 18px;
+    background: #8b4513;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -100%) rotate(60deg); /* 2 o'clock */
+    transform-origin: bottom center;
+    box-shadow: 0 0 4px rgba(139, 69, 19, 0.5);
+    animation: tickHour 43200s steps(12) infinite;
+    z-index: 1;
+}
+
+/* Seconds hand (thin, long, red) */
+.clock-hand.seconds {
+    position: absolute;
+    width: 1px;
+    height: 28px;
+    background: #ff4444;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -100%) rotate(90deg); /* 3 o'clock start */
+    transform-origin: bottom center;
+    box-shadow: 0 0 3px rgba(255, 68, 68, 0.8);
+    animation: tickSeconds 60s steps(60) infinite;
+    z-index: 3;
+}
+
+.clock-dot {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #8b4513;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+}
+
+@keyframes tickSeconds {
+    to { transform: translate(-50%, -100%) rotate(450deg); }
+}
+
+@keyframes tickHour {
+    to { transform: translate(-50%, -100%) rotate(420deg); }
+}
+
+
+
+        .pinyin {
+            display: block;
+            margin-top: 4px;
+            font-size: 0.9rem;
+            color: #ffd27f;
+            font-family: "Arial", "Segoe UI", sans-serif;
+        }
+
+        .main-content {
+            padding: 30px;
+            min-height: 400px;
+            background-image: url('data:image/svg+xml;utf8,\
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">\
+<circle cx="20" cy="100" r="2" fill="%23ffffff" opacity="0.15"/>\
+<circle cx="80" cy="20" r="1.5" fill="%23ffebc3" opacity="0.18"/>\
+<circle cx="55" cy="45" r="1.2" fill="%23ffd27f" opacity="0.22"/>\
+<path d="M10 110 Q45 100 80 108 Q105 112 115 108" stroke="%23ffffff" stroke-width="0.6" opacity="0.18" fill="none"/>\
+</svg>');
+        }
+
+        .story-title {
+            font-size: 1.7rem;
+            margin-bottom: 10px;
+            color: #ffebc3;
+            text-align: center;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+        }
+
+        .story-subtitle {
+            font-size: 1rem;
+            margin-bottom: 25px;
+            color: #ffd27f;
+            text-align: center;
+            opacity: 0.95;
+        }
+
+        .story-section {
+            margin-bottom: 18px;
+            padding: 18px 20px;
+            background: linear-gradient(145deg, rgba(15, 22, 40, 0.9), rgba(35, 35, 70, 0.92));
+            border-radius: 18px;
+            border-left: 4px solid rgba(255, 235, 200, 0.6);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .story-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, rgba(255, 235, 200, 0.7), rgba(255, 215, 160, 0.5));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .story-section:hover::before {
+            opacity: 1;
+        }
+
+        .story-section:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(255, 235, 59, 0.5), 0 0 20px rgba(255, 235, 59, 0.3);
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+            border-left-color: #ffeb3b;
+        }
+
+        .story-chinese {
+            font-size: 1.05rem;
+            line-height: 1.8;
+            color: #fdf5e6;
+        }
+
+        /* 高亮“一寸光阴一寸金…”的段落 */
+        .highlight-time {
+            margin-top: 8px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: radial-gradient(circle at left, rgba(255, 215, 160, 0.35), rgba(20, 20, 50, 0.95));
+            border-left: 4px solid #ffd27f;
+            color: #ffe9b0;
+            font-weight: 600;
+            box-shadow:
+                0 0 16px rgba(255, 215, 160, 0.4),
+                inset 0 0 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .footer-note {
+            margin-top: 24px;
+            font-size: 0.95rem;
+            text-align: center;
+            color: #ffe9b0;
+            opacity: 0.95;
+        }
+
+        .footer-note span {
+            color: #ffd27f;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .game-header h1 {
+                font-size: 2rem;
+            }
+
+            .story-chinese {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <h1>光阴一去不复返</h1>
+            <p>时间不声不响地走过，每一刻都不会回来。</p>
+            <div class="subtitle">我们每个人，都要懂得爱惜时间才好。</div>
+<div class="clock-decoration">
+    <div class="clock-inner"></div>
+    <div class="clock-hand hour"></div>
+    <div class="clock-hand seconds"></div>
+    <div class="clock-dot"></div>
+</div>
+
+        </div>
+
+        <div class="main-content">
+            <div class="story-title">光阴的故事</div>
+            <div class="story-subtitle">安静地读一读，想一想：你的每一个“滴答”是怎么过去的？</div>
+
+            <div class="story-section">
+                <div class="story-chinese">
+                    花儿谢了，有再开的时候，叶子落了，有再长的时候，只有光阴一去不再回来。<br>
+                    <span class="pinyin">guāng yīn yí qù bù fù fǎn, huār xiè le, yǒu zài kāi de shí hòu, yè zi luò le,
+                        yǒu zài zhǎng de shí hòu, zhǐ yǒu guāng yīn yí qù bú zài huí lái.</span>
+                </div>
+            </div>
+            <div class="story-section">
+                <div class="story-chinese">
+                    小朋友，你也许没有注意到光阴是怎样过去的吧，他不声不响，匆匆忙忙过去，你躺着休息，他便从床边悄悄溜过去了。<br>
+                    <span class="pinyin">xiǎo péng yǒu, nǐ yě xǔ méi yǒu zhù yì dào guāng yīn shì zěn yàng guò qù de ba,
+                        tā bù shēng bù xiǎng, cōng cōng máng máng guò qù, nǐ tǎng zhe xiū xi, tā biàn cóng chuáng biān
+                        qiāo qiāo liū guò qù le.</span>
+                </div>
+            </div>
+            <div class="story-section">
+                <div class="story-chinese">
+                    你坐着读书，他便从桌旁不知不觉走过去了。你在操场上打球，在草地上游戏，他便从欢笑声中跑过去了。<br>
+                    <span class="pinyin">nǐ zuò zhe dú shū, tā biàn cóng zhuō páng bù zhī bù jué zǒu guò qù le. nǐ zài
+                        cāo chǎng shàng dǎ qiú, zài cǎo dì shàng yóu xì, tā biàn cóng huān xiào shēng zhōng pǎo guò qù
+                        le.</span>
+                </div>
+            </div>
+            <div class="story-section">
+                <div class="story-chinese">
+                    小朋友，你有没有觉察到？看看挂在墙上的钟，总可以听见滴答滴答的响声吧？<br>
+                    <span class="pinyin">xiǎo péng yǒu, nǐ yǒu méi yǒu jué chá dào? kàn kan guà zài qiáng shàng de
+                        zhōng, zǒng kě yǐ tīng jiàn dī dā dī dā de xiǎng shēng ba?</span>
+                </div>
+            </div>
+            <div class="story-section">
+                <div class="story-chinese">
+                    你一定知道，一个滴答就是一秒钟，你或许以为每个滴答花去的时间都很短吧，短短的一分钟里有60秒钟.<br>
+                    <span class="pinyin">nǐ yí dìng zhī dào, yí gè dī dā jiù
+                        shì yì miǎo zhōng, nǐ huò xǔ yǐ wéi měi gè dī dā huā qù de shí jiān dōu hěn duǎn ba, duǎn duǎn
+                        de yì fēn zhōng lǐ yǒu liù shí miǎo zhōng.</span>
+                </div>
+            </div>
+            <div class="story-section">
+                <div class="story-chinese">
+                    你有没有想过，无限长的时间就是这样滴答滴答一分一秒地过去的。<br>
+                    <span class="pinyin">nǐ yǒu méi yǒu xiǎng guò, wú xiàn cháng de shí jiān
+                        jiù shì zhè yàng dī dā dī dā yì fēn yì miǎo de guò qù de.</span>
+                </div>
+            </div>
+            <div class="story-section">
+                <div class="story-chinese">
+                    你愿意做一个实验吗？请你来写个“光阴”的“光”字吧。<br>
+                    <span class="pinyin">nǐ yuàn yì zuò yí gè shí yàn ma? qǐng nǐ lái xiě gè “guāng yīn” de “guāng” zì
+                        ba.</span>
+                </div>
+            </div>
+            <div class="story-section">
+                <div class="story-chinese">
+                    当你打开本子的时候，第一个“滴答”过去了，当你拿起笔，第二个“滴答”也过去了，当你开始写，第三个“滴答”、第四个“滴答”又过去了。<br>
+                    <span class="pinyin">dāng nǐ dǎ kāi běn zi de shí hòu, dì yī gè “dī dā” guò qù le, dāng nǐ ná qǐ bǐ,
+                        dì èr gè “dī dā” yě guò qù le, dāng nǐ kāi shǐ xiě, dì sān gè “dī dā”、dì sì gè “dī dā” yòu guò
+                        qù le.</span>
+                </div>
+            </div>
+            <div class="story-section">
+                <div class="story-chinese">
+                    小朋友，一个“滴答”的时间似乎很短，使你以为它能做的事实在太少了。<br>
+                    <span class="pinyin">xiǎo péng yǒu, yí gè “dī dā” de shí jiān sì hū hěn duǎn, shǐ nǐ yǐ wéi tā néng
+                        zuò de shì shí zài tài shǎo le.</span>
+                </div>
+            </div>
+
+            <div class="story-section">
+                <div class="story-chinese">
+                    可是你知道吗？世界上有许多伟大的人物，都是因为善于利用每个“滴答”的时间才获得成功。<br>
+                    <span class="pinyin">kě shì nǐ zhī dào ma? shì jiè shàng yǒu xǔ duō wěi dà de rén wù, dōu shì yīn
+                        wèi shàn yú lì yòng měi gè “dī dā” de shí jiān cái huò dé chéng gōng.</span>
+                </div>
+            </div>
+            <div class="story-section">
+                <div class="story-chinese">
+                    <div class="highlight-time">
+                        所以人们常说：“一寸光阴一寸金，寸金难买寸光阴。”<br>
+                        <span class="pinyin">suǒ yǐ rén men cháng shuō: “yí cùn guāng yīn yí cùn jīn, cùn jīn nán mǎi
+                            cùn guāng yīn.”</span>
+                    </div>
+                </div>
+            </div>
+            <div class="story-section">
+                <div class="story-chinese">
+                    又说：“少壮不努力，老大徒伤悲。”我们每个人都要懂得爱惜时间才好。<br>
+                    <span class="pinyin">yòu shuō: “shào zhuàng bù nǔ lì, lǎo dà tú shāng bēi.” wǒ men měi gè rén dōu
+                        yào dǒng de ài xī shí jiān cái hǎo.</span>
+                </div>
+            </div>
+
+            <div class="footer-note">
+                ⏰ 也许一个“滴答”只有一秒钟，<span>但一点一滴累积起来，就是你整个人生的光阴</span>。<br>
+                <span class="pinyin">yě xǔ yí gè “dī dā” zhǐ yǒu yì miǎo zhōng, dàn yì diǎn yì dī lěi jī qǐ lái, jiù shì
+                    nǐ zhěng gè rén shēng de guāng yīn.</span>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
