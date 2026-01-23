@@ -378,6 +378,29 @@
         ];
 
         const diceElements = ["dice1", "dice2", "dice3"].map(id => document.getElementById(id));
+// 🔊 iPad Safari 音频激活修复
+let audioUnlocked = false;
+
+function unlockAudio() {
+    if (audioUnlocked) return;
+    
+    // 创建临时音频上下文激活
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    
+    osc.connect(gain);
+    gain.connect(audioContext.destination);
+    
+    osc.frequency.value = 0; // 静音频率
+    gain.gain.setValueAtTime(0, audioContext.currentTime);
+    
+    osc.start();
+    osc.stop(audioContext.currentTime + 0.01);
+    
+    audioUnlocked = true;
+    console.log('✅ iPad音频已激活');
+}
 
         // Dice roll sound using Web Audio API
         function playDiceSound() {
@@ -393,6 +416,10 @@
             ];
 
             let time = 0;
+            if (!audioUnlocked) {
+               unlockAudio();
+               return;
+            }
             notes.forEach(note => {
                 const oscillator = audioContext.createOscillator();
                 const gainNode = audioContext.createGain();
@@ -421,7 +448,10 @@
             const whooshOsc = audioContext.createOscillator();
             const whooshGain = audioContext.createGain();
             const whooshFilter = audioContext.createBiquadFilter();
-
+            if (!audioUnlocked) {
+               unlockAudio();
+               return;
+            }
             whooshOsc.connect(whooshFilter);
             whooshFilter.connect(whooshGain);
             whooshGain.connect(audioContext.destination);
@@ -487,7 +517,9 @@
                 }, 300);
             });
         });
-
+        // 页面加载时监听首次触摸/点击
+        document.addEventListener('touchstart', unlockAudio, { once: true });
+        document.addEventListener('click', unlockAudio, { once: true });
         // Dropdown functionality
         document.querySelector(".dropbtn").addEventListener("click", function () {
             document.querySelector(".dropdown-content").classList.toggle("show");
