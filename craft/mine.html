@@ -344,6 +344,51 @@
             width: auto;
             /* Optional: filter: drop-shadow(2px 2px 5px rgba(0,0,0,0.2)); */
         }
+
+        .game-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            color: #FFFFFF;
+            text-shadow: 3px 3px 0px #3F3F3F;
+        }
+
+        .info-icon {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            line-height: 26px;
+            text-align: center;
+
+            /* Minecraft Green/Emerald Colors */
+            background-color: #55FF55;
+            border: 3px solid #000000;
+            border-top-color: #AAFFAA;
+            /* Highlighted edge */
+            border-left-color: #AAFFAA;
+
+            color: #004400;
+            /* Darker green text for contrast */
+            text-decoration: none;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 20px;
+
+            /* The Glowing Effect */
+            box-shadow: 0 0 10px #55FF55, 0 0 5px #00AA00;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .info-icon:hover {
+            background-color: #00FF00;
+            /* Brighter on hover */
+            box-shadow: 0 0 20px #55FF55, 0 0 10px #FFFFFF;
+            /* Intense glow */
+            transform: scale(1.15) rotate(5deg);
+            /* Slight pop and tilt */
+            color: #FFFFFF;
+        }
     </style>
 </head>
 
@@ -352,7 +397,11 @@
         <div class="main-content">
             <div class="header-container">
                 <div class="title-group">
-                    <h1 class="game-title">HANZI CRAFTER</h1>
+                    <h1 class="game-title">
+                        HANZI CRAFTER
+                        <a href="https://zpinpin.github.io/craft/instruction.html" class="info-icon"
+                            title="Game Info">i</a>
+                    </h1>
                     <p>Building <i>形声字 (Xíngshēngzì)</i></p>
                 </div>
                 <img src="Li.png" class="title-image">

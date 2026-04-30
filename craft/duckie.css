@@ -1,0 +1,131 @@
+/* --- CONTAINER --- */
+#duck-party {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 150px;
+    height: 120px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 1000;
+    pointer-events: auto;
+    cursor: grab;
+    user-select: none;
+}
+
+.character-duck {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.rubber-ducky-img {
+    width: 60px;
+    height: auto;
+    z-index: 1;
+}
+
+/* --- THE MINING PLANK --- */
+.duck-hat {
+    position: absolute;
+    top: -15px;
+    z-index: 2;
+    background: #8B5A2B;
+    border: 3px solid #3d2511;
+    border-radius: 2px;
+    padding: 1px 5px 1px 10px;
+    min-width: 80px;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: center;
+    animation: mineVibrate 0.2s linear infinite;
+}
+
+/* THE PICKAXE */
+.duck-hat::before {
+    content: "⛏️";
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform-origin: top right;
+    font-size: 18px;
+    z-index: 3;
+    animation: pickSwing 0.4s ease-in-out infinite;
+}
+
+/* THE RADICAL */
+.duck-hat::after {
+    content: "亻";
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: 24px;
+    color: #f5deb3;
+    font-weight: bold;
+    margin-right: 3px;
+    animation: radicalSwap 48s steps(1, end) infinite;
+    animation-delay: var(--duck-delay, 0s);
+}
+
+/* THE EMOJI (Glowing) */
+.emoji-glow::after {
+    font-size: 22px;
+    display: inline-block;
+    animation:
+        emojiSwap 48s steps(1, end) infinite,
+        pulseGlow 2s ease-in-out infinite;
+    animation-delay: var(--duck-delay, 0s), 0s;
+}
+
+/* --- ANIMATIONS --- */
+
+@keyframes pulseGlow {
+    0%, 100% { filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.2)); }
+    50% { filter: drop-shadow(0 0 8px #FFD700) drop-shadow(0 0 4px #FFF); }
+}
+
+@keyframes pickSwing {
+    0%, 100% { transform: translateY(-50%) rotate(0deg); }
+    50% { transform: translateY(-50%) rotate(-35deg); }
+}
+
+@keyframes mineVibrate {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(1px, -1px); }
+    75% { transform: translate(-1px, 1px); }
+}
+
+@keyframes radicalSwap {
+    0.00%  { content: "亻"; } 4.17%  { content: "口"; } 8.33%  { content: "女"; }
+    12.50% { content: "宀"; } 16.67% { content: "山"; } 20.83% { content: "心"; }
+    25.00% { content: "忄"; } 29.17% { content: "扌"; } 33.33% { content: "攵"; }
+    37.50% { content: "日"; } 41.67% { content: "月"; } 45.83% { content: "木"; }
+    50.00% { content: "氵"; } 54.17% { content: "犭"; } 58.33% { content: "石"; }
+    62.50% { content: "米"; } 66.67% { content: "艹"; } 70.83% { content: "讠"; }
+    75.00% { content: "车"; } 79.17% { content: "金"; } 83.33% { content: "雨"; }
+    87.50% { content: "马"; } 91.67% { content: "鱼"; } 95.83% { content: "鸟"; }
+}
+
+@keyframes emojiSwap {
+    0.00%  { content: "👤"; } 4.17%  { content: "👄"; } 8.33%  { content: "👩"; }
+    12.50% { content: "🏠"; } 16.67% { content: "⛰️"; } 20.83% { content: "❤️"; }
+    25.00% { content: "❤️"; } 29.17% { content: "🖐️"; } 33.33% { content: "👊"; }
+    37.50% { content: "☀️"; } 41.67% { content: "🌙"; } 45.83% { content: "🌲"; }
+    50.00% { content: "💧"; } 54.17% { content: "🐕"; } 58.33% { content: "🪨"; }
+    62.50% { content: "🍚"; } 66.67% { content: "🌱"; } 70.83% { content: "🗣️"; }
+    75.00% { content: "🚗"; } 79.17% { content: "👑"; } 83.33% { content: "🌧️"; }
+    87.50% { content: "🐎"; } 91.67% { content: "🐟"; } 95.83% { content: "🕊️"; }
+}
+
+/* Override fixed container for horizontal line */
+#duck-party-line {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    width: 100%;
+    gap: 30px;
+    padding-top: 40px;
+    z-index: 1000;
+    pointer-events: none;
+}

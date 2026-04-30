@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>诗仙密码-偏旁部首远征. 游戏指南</title>
+    <link rel="stylesheet" href="duckie.css">
+    <style>
+        body {
+            background-color: #313131;
+            color: #FFFFFF;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 50px 0;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        #duck-party-line {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            width: 100%;
+        }
+
+        .container {
+            background-color: #C6C6C6;
+            border: 4px solid #555555;
+            border-top-color: #FFFFFF;
+            border-left-color: #FFFFFF;
+            padding: 20px;
+            width: 450px;
+            box-shadow: 10px 10px 0px #000000;
+        }
+
+        h1 {
+            color: #3F3F3F;
+            text-align: center;
+            text-shadow: 2px 2px #AAAAAA;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .instruction-box {
+            background-color: #212121;
+            border: 2px solid #373737;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .step {
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+
+        .highlight {
+            color: #55FF55;
+            font-weight: bold;
+        }
+
+        .lava-text {
+            color: #FF5555;
+            font-weight: bold;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #7A7A7A;
+            border: 3px solid #000000;
+            border-top-color: #BCBCBC;
+            border-left-color: #BCBCBC;
+            color: #FFFFFF;
+            text-align: center;
+            text-decoration: none;
+            font-weight: bold;
+            text-shadow: 2px 2px #3F3F3F;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background-color: #8B8B8B;
+            border-top-color: #E2E2E2;
+            border-left-color: #E2E2E2;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>《诗仙密码-偏旁部首远征》操作指南</h1>
+
+        <div class="instruction-box">
+            <div class="step">
+                <span class="highlight">1. 选择单位 (Select Unit):</span><br>
+                从工具箱 (Toolbox) 中挑选你的基本单位，准备出发！
+            </div>
+            <div class="step">
+                <span class="highlight">2. 组合汉字 (Build Character):</span><br>
+                挑选部首，将它们添加到主面板 (Main Panel) 的基础汉字上。
+            </div>
+            <div class="step">
+                <span class="lava-text">3. 使用岩浆 (Lava Tool):</span><br>
+                如果放错了部首，使用岩浆 (Lava) 即可瞬间清除，重新开始！
+            </div>
+        </div>
+
+        <a href="https://zpinpin.github.io/craft/mine.html" class="btn">开始冒险！</a>
+    </div>
+
+    <div id="duck-party-line">
+        <div class="character-duck">
+            <div class="duck-hat emoji-glow"></div>
+            <img src="duckie.png" class="rubber-ducky-img" alt="duck">
+        </div>
+        <div class="character-duck">
+            <div class="duck-hat emoji-glow"></div>
+            <img src="duckie.png" class="rubber-ducky-img" alt="duck">
+        </div>
+        <div class="character-duck">
+            <div class="duck-hat emoji-glow"></div>
+            <img src="duckie.png" class="rubber-ducky-img" alt="duck">
+        </div>
+        <div class="character-duck">
+            <div class="duck-hat emoji-glow"></div>
+            <img src="duckie.png" class="rubber-ducky-img" alt="duck">
+        </div>
+        <div class="character-duck">
+            <div class="duck-hat emoji-glow"></div>
+            <img src="duckie.png" class="rubber-ducky-img" alt="duck">
+        </div>
+        <div class="character-duck">
+            <div class="duck-hat emoji-glow"></div>
+            <img src="duckie.png" class="rubber-ducky-img" alt="duck">
+        </div>
+    </div>
+
+    <script>
+        const CYCLE = 48;
+        const TOTAL = 24;
+        const STEP = CYCLE / TOTAL; // 2 seconds per radical
+
+        // Shuffle indices 0–23 and take the first 6
+        const indices = Array.from({ length: TOTAL }, (_, i) => i);
+        for (let i = indices.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [indices[i], indices[j]] = [indices[j], indices[i]];
+        }
+
+        document.querySelectorAll('.character-duck').forEach((duck, i) => {
+            const delay = -(indices[i] * STEP);
+            duck.querySelector('.duck-hat').style.setProperty('--duck-delay', `${delay}s`);
+        });
+    </script>
+
+</body>
+</html>
