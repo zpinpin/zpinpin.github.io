@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Hanzi Crafter</title>
+    <link rel="stylesheet" href="boat.css">
+    <style>
+        :root {
+            --mc-green: #5aa742;
+            --mc-dirt: #795548;
+            --mc-stone: #333333;
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #1a1a1a;
+            background-image: url('https://transparenttextures.com');
+            color: #f1f1f1;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .game-title {
+            color: var(--mc-green);
+            text-shadow: 2px 2px #000;
+            font-size: 2.5em;
+        }
+
+        /* Minecraft Crafting Table Look */
+        .crafting-container {
+            width: 800px;
+            margin: 20px auto;
+            background: #c6c6c6;
+            border: 4px solid #373737;
+            border-top-color: #ffffff;
+            border-left-color: #ffffff;
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        /* The Game Board (Canvas) */
+        #game-board {
+            width: 400px;
+            height: 400px;
+            background: #8b8b8b;
+            border: 4px solid #373737;
+            border-bottom-color: #ffffff;
+            border-right-color: #ffffff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Draggable Components */
+        .hanzi-part {
+            position: absolute;
+            cursor: move;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed transparent;
+            font-weight: bold;
+        }
+
+        .hanzi-part:hover {
+            border-color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .hanzi-part:active {
+            cursor: grabbing;
+        }
+
+        /* Sidebar UI */
+        .toolbox {
+            width: 300px;
+            left: 30px;
+            background: #404040;
+            border: 2px solid #000;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .item-slot {
+            background: #8b8b8b;
+            border: 2px solid #373737;
+            padding: 10px;
+            cursor: pointer;
+            display: inline-block;
+            font-size: 30px;
+            transition: 0.2s;
+        }
+
+        .item-slot:hover {
+            background: #5aa742;
+        }
+
+        /* Controls */
+        .controls {
+            margin-top: 10px;
+            text-align: left;
+            font-size: 0.8em;
+        }
+
+        input[type="range"] {
+            width: 100%;
+        }
+
+        .active-label {
+            color: #ffff00;
+            font-weight: bold;
+        }
+
+
+        p {
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        .crafting-container {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .toolbox {
+            width: 30%;
+            background: var(--mc-panel);
+            border: 4px solid var(--mc-border);
+            padding: 12px;
+            box-sizing: border-box;
+        }
+
+        .unit-slot,
+        .item-slot {
+            background: #3a3a3a;
+            border: 2px solid #666;
+            padding: 10px;
+            margin: 8px 0;
+            cursor: pointer;
+            user-select: none;
+            text-align: center;
+        }
+
+        .unit-slot:hover,
+        .item-slot:hover {
+            background: #4a4a4a;
+        }
+
+        .unit-slot.selected {
+            border-color: var(--mc-blue);
+            background: #2f4d6b;
+        }
+
+        .controls {
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 2px solid #555;
+        }
+
+        .active-label {
+            margin: 0 0 10px 0;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            margin-bottom: 6px;
+        }
+
+        input[type="range"],
+        input[type="color"] {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .unit-group {
+            margin-bottom: 16px;
+        }
+
+        .unit-title {
+            font-weight: bold;
+            color: var(--mc-green);
+            margin: 8px 0;
+        }
+
+        .radical-meta {
+            font-size: 12px;
+            opacity: 0.85;
+            margin-top: 4px;
+        }
+
+        .small-note {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+
+        .toolbox {
+            position: fixed;
+            /* Keeps it in one place as you scroll the page */
+            right: 20px;
+            /* Adjust placement as needed */
+            top: 20px;
+
+            width: 350px;
+            /* Set your desired width */
+            height: 90vh;
+            /* Takes up 90% of the screen height */
+
+            overflow-y: auto;
+            /* Adds the vertical scrollbar when content overflows */
+            padding: 15px;
+            background: #333;
+            /* Assuming a dark theme based on your 'lava' button */
+            border: 2px solid var(--mc-green);
+
+            /* Optional: custom scrollbar to match a game aesthetic */
+            scrollbar-width: thin;
+            scrollbar-color: var(--mc-green) #222;
+        }
+
+        #unit-list {
+            height: 150px;
+            /* Fixed vertical size */
+            min-height: 100px;
+            overflow-y: auto;
+            /* Enable vertical scroll */
+            margin-top: 8px;
+            padding: 5px;
+            background: rgba(0, 0, 0, 0.2);
+            /* Subtle contrast for the scroll area */
+            border: 1px solid #555;
+
+            /* Minecraft-style scrollbar for Firefox */
+            scrollbar-width: thin;
+            scrollbar-color: var(--mc-green) #222;
+        }
+
+        /* Scrollbar styling for Chrome/Safari/Edge */
+        #unit-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #unit-list::-webkit-scrollbar-track {
+            background: #222;
+        }
+
+        #unit-list::-webkit-scrollbar-thumb {
+            background-color: var(--mc-green);
+        }
+
+        .game-layout {
+            display: flex;
+            flex-direction: row;
+            /* Side-by-side */
+            justify-content: left;
+            align-items: flex-start;
+            gap: 30px;
+            padding: 20px;
+        }
+
+        .instructions {
+            text-align: left;
+            background: #ecf0f1;
+            color: #2c3e50;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .side-panel {
+            position: fixed;
+            /* Keeps it in one place as you scroll the page */
+            right: 20px;
+
+            display: flex;
+            flex-direction: column;
+            /* Vertical stack */
+            gap: 20px;
+            /* Space between Timer and Instructions */
+            width: 300px;
+            /* Adjust width to fit your text */
+            flex-shrink: 0;
+            /* Prevents sidebar from squishing */
+        }
+
+        .main-content {
+            flex-grow: 1;
+            margin-left: 400px;
+            /* toolbox width + gap */
+            margin-right: 350px;
+            /* side-panel width + gap */
+            /* Allows game area to take remaining space */
+        }
+
+        /* Optional: Ensure the timer doesn't shrink */
+        [data-timer] {
+            flex-shrink: 0;
+            width: 200px;
+            /* Adjust based on your widget size */
+        }
+
+        .header-container {
+            display: flex;
+            align-items: center;
+            /* Vertically aligns image and text */
+            justify-content: center;
+            /* THIS CENTERS THE WHOLE GROUP HORIZONTALLY */
+            gap: 20px;
+            margin-bottom: 10px;
+            width: 100%;
+            /* Ensures the container spans the full width to center correctly */
+        }
+
+        .title-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /* Centers the <h1> and <p> inside the text group */
+            text-align: center;
+            /* Ensures text is centered within its block */
+        }
+
+        .game-title {
+            margin: 0;
+            /* Removes default spacing to keep alignment tight */
+            font-size: 3rem;
+            /* Adjust as needed */
+        }
+
+        .title-image {
+            height: 80px;
+            /* Set height to match your title size */
+            width: auto;
+            /* Optional: filter: drop-shadow(2px 2px 5px rgba(0,0,0,0.2)); */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-layout">
+        <div class="main-content">
+            <div class="header-container">
+                <div class="title-group">
+                    <h1 class="game-title">HANZI CRAFTER</h1>
+                    <p>Building <i>形声字 (Xíngshēngzì)</i></p>
+                </div>
+                <img src="Li.png" class="title-image">
+            </div>
+            <p>Click a unit on the left to swap the base character, then drag parts to the board.</p>
+
+            <div class="crafting-container">
+                <div id="game-board">
+                    <div>
+                        <div class="hanzi-part" id="part-base"
+                            style="top:100px; left:150px; font-size:150px; color:#ffffff;">肖
+                        </div>
+                        <div id="duck-party">
+                            <div class="character-duck">
+                                <div class="duck-hat">
+                                    <span class="emoji-glow"></span>
+                                </div>
+                                <img src="duckie.png" alt="Duckie" class="rubber-ducky-img">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="toolbox">
+                        <div style="font-weight:bold; color:var(--mc-green);">[ UNITS ]</div>
+                        <div id="unit-list"></div>
+
+                        <div style="font-weight:bold; color:var(--mc-green); margin-top:16px;">[ RADICAL INVENTORY ]
+                        </div>
+                        <div id="radical-inventory"></div>
+
+                        <div class="small-note" id="unit-info">Selected unit: unit1_kuang</div>
+
+                        <div class="controls" id="editor-ui">
+                            <p class="active-label">Editing: <span id="target-name">None</span></p>
+                            <label>Size:</label>
+                            <input type="range" id="size-slider" min="40" max="200" value="100" oninput="updateStyle()">
+                            <label>Color:</label>
+                            <input type="color" id="color-picker" value="#ffffff" oninput="updateStyle()">
+                            <button onclick="deletePart()"
+                                style="margin-top:10px; background:#aa0000; color:white; border:none; padding:5px; width:100%;">
+                                THROW IN LAVA (Delete)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="side-panel">
+            <div data-timer data-timer-mode="countdown" data-timer-seconds="30" data-timer-label="⛏  Craft Timer"
+                data-timer-theme="minecraft"></div>
+        </div>
+
+    </div>
+    <script>
+        let activePart = null;
+        let selectedUnitKey = 'unit1_xiao';
+
+        const board = document.getElementById('game-board');
+
+        const gameData = {
+            "unit1_xiao": {
+                "base": "肖",
+                "radicals": [
+                    { "char": "氵", "pos": "LEFT", "result": "消 (Disappear)" },
+                    { "char": "口", "pos": "LEFT", "result": "哨 (Whistle/Lookout)" },
+                    { "char": "肖", "pos": "RIGHT", "result": "销 (Melt/Sell)" }
+                ]
+            },
+            "unit2_jian": {
+                "base": "斩",
+                "radicals": [
+                    { "char": "氵", "pos": "LEFT", "result": "渐 (Gradually)" },
+                    { "char": "木", "pos": "LEFT", "result": "斩 (Cut down)" }
+                ]
+            },
+            "unit3_chuan": {
+                "base": "专",
+                "radicals": [
+                    { "char": "亻", "pos": "LEFT", "result": "传 (Pass on)" },
+                    { "char": "石", "pos": "LEFT", "result": "砖 🧱" },
+                    { "char": "车", "pos": "LEFT", "result": "转 (Turn/Rotate)" }
+                ]
+            },
+            "unit4_zhi": {
+                "base": "知",
+                "radicals": [
+                    { "char": "日", "pos": "TOP", "result": "智 (Wisdom)" },
+                    { "char": "矢", "pos": "LEFT", "result": "知 (Know)" },
+                    { "char": "口", "pos": "LEFT", "result": "哉 (Exclamatory particle)" }
+                ]
+            },
+            "unit5_sou": {
+                "base": "叟",
+                "radicals": [
+                    { "char": "饣", "pos": "LEFT", "result": "馊 (Spoiled/Rancid)" },
+                    { "char": "扌", "pos": "LEFT", "result": "搜 (Search)" },
+                    { "char": "虫", "pos": "LEFT", "result": "螋 (Earwig)" },
+                    { "char": "女", "pos": "LEFT", "result": "嫂 (Sister-in-law)" },
+                    { "char": "白", "pos": "LEFT", "result": "廋 (Hidden/To thin)" }
+                ]
+            },
+            "unit6_chao": {
+                "base": "朝",
+                "radicals": [
+                    { "char": "月", "pos": "RIGHT", "result": "朝 (Morning)" },
+                    { "char": "氵", "pos": "LEFT", "result": "潮 (Tide)" },
+                    { "char": "口", "pos": "TOP", "result": "嘲 (Mock)" }
+                ]
+            },
+            "unit7_ben": {
+                "base": "本",
+                "radicals": [
+                    { "char": "⺮", "pos": "TOP", "result": "笨 (Stupid)" },
+                    { "char": "钅", "pos": "BOTTOM", "result": "钵 (small metal bowl)" },
+                    { "char": "亻", "pos": "BOTTOM", "result": "体 (body)" }
+                ]
+            },
+            "unit8_hutulu": {
+                "base": "胡",
+                "radicals": [
+                    { "char": "米", "pos": "LEFT", "result": "糊 (Paste/Confused)" },
+                    { "char": "氵", "pos": "LEFT", "result": "湖 (Lake)" },
+                    { "char": "艹", "pos": "TOP", "result": "葫 (Gourd)" },
+                    { "char": "虫", "pos": "LEFT", "result": "蝴蝶 (Butterfly)" },
+                    { "char": "口", "pos": "LEFT", "result": "嘲 (Mock/Jeer - variant)" },
+                    { "char": "犭", "pos": "LEFT", "result": "猢 (Monkey)" }
+                ]
+            },
+            "unit16_hutulu": {
+                "base": "余",
+                "radicals": [
+                    { "char": "氵", "pos": "LEFT", "result": "涂 (Smear/Paint)" },
+                    { "char": "辶", "pos": "BOTTOM-LEFT", "result": "途 (Way/Journey)" },
+                    { "char": "阝", "pos": "LEFT", "result": "除 (Remove/Divide)" },
+                    { "char": "彳", "pos": "LEFT", "result": "徐 (Slowly/Surname)" },
+                    { "char": "人", "pos": "LEFT", "result": "馀 (Surplus/Traditional)" },
+                ]
+            },
+            "unit9_tuan": {
+                "base": "才",
+                "radicals": [
+                    { "char": "囗", "pos": "OUTSIDE", "result": "团 (Group)" },
+                    { "char": "才", "pos": "RIGHT", "result": "闭 (Close)" },
+                ]
+            },
+            "unit10_jianshi": {
+                "base": "寺",
+                "radicals": [
+                    { "char": "讠", "pos": "LEFT", "result": "诗 (Poem)" },
+                    { "char": "扌", "pos": "LEFT", "result": "持 (Persist/Hold)" },
+                    { "char": "彳", "pos": "LEFT", "result": "待 (Wait/Treat)" },
+                    { "char": "牛", "pos": "LEFT", "result": "特 (Special)" },
+                    { "char": "竹", "pos": "TOP", "result": "等 (Wait/Rank)" },
+                    { "char": "亻", "pos": "LEFT", "result": "侍 (Serve/Attend)" }
+                ]
+            },
+            "unit11_gu": {
+                "base": "页",
+                "radicals": [
+                    { "char": "页", "pos": "RIGHT", "result": "顾 (Look after)" },
+                    { "char": "今", "pos": "LEFT", "result": "领 (Beforehand)" }
+                ]
+            },
+            "unit12_reng": {
+                "base": "乃",
+                "radicals": [
+                    { "char": "亻", "pos": "LEFT", "result": "仍 (Still/Yet)" },
+                    { "char": "乃", "pos": "RIGHT", "result": "乃 (Thus)" },
+                    { "char": "女", "pos": "LEFT", "result": "奶 (Milk)" }
+                ]
+            },
+            "unit13_zhi": {
+                "base": "止",
+                "radicals": [
+                    { "char": "足", "pos": "LEFT", "result": "趾 (Toe)" },
+                    { "char": "山", "pos": "LEFT", "result": "歧 (Divergent/Fork)" },
+                    { "char": "氵", "pos": "LEFT", "result": "涩 (Astringent/Rough)" },
+                    { "char": "人", "pos": "TOP", "result": "企 (Enterprise/Plan)" },
+                    { "char": "月", "pos": "BOTTOM", "result": "肯 (Willing/Agree)" },
+                    { "char": "匕", "pos": "RIGHT", "result": "此 (This)" }
+                ]
+            },
+            "unit14_xian": {
+                "base": "山",
+                "radicals": [
+                    { "char": "亻", "pos": "LEFT", "result": "仙 (Immortal)" },
+                    { "char": "火", "pos": "LEFT", "result": "灿 (Brilliant)" },
+                    { "char": "氵", "pos": "LEFT", "result": "汕 (Splashing/Shantou)" },
+                    { "char": "讠", "pos": "LEFT", "result": "讪 (Mock/Slander)" },
+                    { "char": "舟", "pos": "LEFT", "result": "舢 (Sampan boat)" },
+                    { "char": "疒", "pos": "TOP", "result": "疝 (Hernia)" }
+                ]
+            }
+        };
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'pickup') {
+                oscillator.type = 'square';
+                oscillator.frequency.setValueAtTime(600, now);
+                oscillator.frequency.exponentialRampToValueAtTime(800, now + 0.1);
+                gainNode.gain.setValueAtTime(0.1, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                oscillator.start();
+                oscillator.stop(now + 0.1);
+            } else if (type === 'drag') {
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(150, now);
+                gainNode.gain.setValueAtTime(0.02, now);
+                gainNode.gain.linearRampToValueAtTime(0, now + 0.05);
+                oscillator.start();
+                oscillator.stop(now + 0.05);
+            } else if (type === 'place') {
+                oscillator.type = 'triangle';
+                oscillator.frequency.setValueAtTime(200, now);
+                oscillator.frequency.exponentialRampToValueAtTime(100, now + 0.2);
+                gainNode.gain.setValueAtTime(0.1, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                oscillator.start();
+                oscillator.stop(now + 0.2);
+            }
+        }
+        function playLavaDeleteSound() {
+            // Minecraft Ice/Glass break sound
+            const breakSound = new Audio('https://myinstants.com');
+            // Minecraft Lava hiss/fizz sound
+            const lavaSound = new Audio('https://myinstants.com');
+
+            // Adjust volume (0.0 to 1.0)
+            breakSound.volume = 0.5;
+            lavaSound.volume = 0.8;
+
+            // Play both simultaneously
+            breakSound.play();
+            lavaSound.play();
+        }
+
+        function makeDraggable(el) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            el.onmousedown = dragMouseDown;
+
+            function dragMouseDown(e) {
+                e.preventDefault();
+                activePart = el;
+                playSound('pickup');
+                document.getElementById('target-name').innerText = el.innerText;
+                document.getElementById('size-slider').value = parseInt(el.style.fontSize) || 100;
+                document.getElementById('color-picker').value = rgbToHex(el.style.color);
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+            }
+
+            function elementDrag(e) {
+                e.preventDefault();
+                if (Math.random() > 0.9) playSound('drag');
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                el.style.top = (el.offsetTop - pos2) + "px";
+                el.style.left = (el.offsetLeft - pos1) + "px";
+            }
+
+            function closeDragElement() {
+                playSound('place');
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+        }
+
+        function addPart(char) {
+            const newDiv = document.createElement('div');
+            newDiv.className = 'hanzi-part';
+            newDiv.innerText = char;
+            newDiv.style.fontSize = "100px";
+            newDiv.style.color = "#ffaa00";
+            newDiv.style.left = "50px";
+            newDiv.style.top = "50px";
+            board.appendChild(newDiv);
+            makeDraggable(newDiv);
+            activePart = newDiv;
+            document.getElementById('target-name').innerText = char;
+        }
+
+        function updateStyle() {
+            if (!activePart) return;
+            const size = document.getElementById('size-slider').value;
+            const color = document.getElementById('color-picker').value;
+            activePart.style.fontSize = size + "px";
+            activePart.style.color = color;
+        }
+
+        function deletePart() {
+            if (activePart && activePart.id !== 'part-base') {
+                activePart.remove();
+                playLavaDeleteSound();
+                activePart = null;
+                document.getElementById('target-name').innerText = "None";
+            }
+        }
+
+        function rgbToHex(rgb) {
+            if (!rgb) return "#ffffff";
+            if (rgb.startsWith('#')) return rgb;
+            let sep = rgb.indexOf(",") > -1 ? "," : " ";
+            rgb = rgb.substr(4).split(")")[0].split(sep);
+            let r = (+rgb[0]).toString(16), g = (+rgb[1]).toString(16), b = (+rgb[2]).toString(16);
+            if (r.length == 1) r = "0" + r;
+            if (g.length == 1) g = "0" + g;
+            if (b.length == 1) b = "0" + b;
+            return "#" + r + g + b;
+        }
+
+        function setSelectedUnit(unitKey) {
+            selectedUnitKey = unitKey;
+            const unit = gameData[unitKey];
+
+            const baseEl = document.getElementById('part-base');
+            baseEl.textContent = unit.base;
+
+            document.getElementById('unit-info').textContent = `Selected unit: ${unitKey} | Base: ${unit.base}`;
+
+            document.querySelectorAll('.unit-slot').forEach(el => {
+                el.classList.toggle('selected', el.dataset.unitKey === unitKey);
+            });
+
+            renderRadicals(unitKey);
+        }
+
+        function renderUnits() {
+            const unitList = document.getElementById('unit-list');
+            unitList.innerHTML = '';
+
+            Object.entries(gameData).forEach(([unitKey, unit]) => {
+                const slot = document.createElement('div');
+                slot.className = 'unit-slot';
+                slot.dataset.unitKey = unitKey;
+                slot.innerHTML = `
+                    <div>${unitKey}</div>
+                    <div class="radical-meta">Base: ${unit.base} · ${unit.radicals.length} radicals</div>
+                `;
+                slot.addEventListener('click', () => setSelectedUnit(unitKey));
+                unitList.appendChild(slot);
+            });
+        }
+
+        function renderRadicals(unitKey) {
+            const inventory = document.getElementById('radical-inventory');
+            inventory.innerHTML = '';
+
+            const unit = gameData[unitKey];
+
+            const group = document.createElement('div');
+            group.className = 'unit-group';
+
+            const title = document.createElement('div');
+            title.className = 'unit-title';
+            title.textContent = `${unitKey} — base: ${unit.base}`;
+            group.appendChild(title);
+
+            unit.radicals.forEach(radical => {
+                const slot = document.createElement('div');
+                slot.className = 'item-slot';
+                slot.innerHTML = `
+                    <div>${radical.char}</div>
+                    <div class="radical-meta">${radical.pos} · ${radical.result}</div>
+                `;
+                slot.addEventListener('click', () => addPart(radical.char));
+                group.appendChild(slot);
+            });
+
+            inventory.appendChild(group);
+        }
+
+        makeDraggable(document.getElementById('part-base'));
+        renderUnits();
+        setSelectedUnit(selectedUnitKey);
+    </script>
+
+</body>
+
+</html>
