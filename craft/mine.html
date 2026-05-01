@@ -879,8 +879,15 @@
         }
 
         makeDraggable(document.getElementById('part-base'));
-        renderUnits();
-        setSelectedUnit(selectedUnitKey);
+        window.addEventListener('DOMContentLoaded', () => {
+            // Initial Setup
+            renderUnits();
+            setSelectedUnit(selectedUnitKey);
+
+            // Ensure UI reflects the starting state
+            const startBase = gameData[selectedUnitKey];
+            updateResultDisplay({ char: startBase.base, meaning: "Base Component" });
+        });
     </script>
 
 </body>
