@@ -389,6 +389,52 @@
             /* Slight pop and tilt */
             color: #FFFFFF;
         }
+
+        .minecraft-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            /* Directly opposite the bottom-right image */
+            width: 200px;
+            background: #c6c6c6;
+            border: 4px solid #373737;
+            border-top-color: #ffffff;
+            border-left-color: #ffffff;
+            image-rendering: pixelated;
+            padding: 10px;
+            z-index: 1000;
+            box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
+        }
+
+        .result-title {
+            font-size: 12px;
+            color: #373737;
+            margin-bottom: 5px;
+            border-bottom: 2px solid #8b8b8b;
+        }
+
+        .result-display {
+            font-size: 60px;
+            background: #8b8b8b;
+            border: 3px solid #373737;
+            border-bottom-color: #ffffff;
+            border-right-color: #ffffff;
+            margin: 10px 0;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-shadow: 3px 3px #000;
+        }
+
+        .result-meaning {
+            font-size: 14px;
+            color: #ffffff;
+            background: #404040;
+            padding: 5px;
+            text-transform: uppercase;
+        }
     </style>
 </head>
 
@@ -414,6 +460,13 @@
                         <div class="hanzi-part" id="part-base"
                             style="top:100px; left:150px; font-size:150px; color:#ffffff;">肖
                         </div>
+                        <!-- Result Block -->
+                        <div id="combination-result" class="minecraft-panel">
+                            <div class="result-title">CRAFTED RESULT</div>
+                            <div id="result-char" class="result-display">-</div>
+                            <div id="result-meaning" class="result-meaning">Select a radical</div>
+                        </div>
+
                         <div id="duck-party">
                             <div class="character-duck">
                                 <div class="duck-hat">
@@ -695,6 +748,42 @@
             makeDraggable(newDiv);
             activePart = newDiv;
             document.getElementById('target-name').innerText = char;
+
+            // --- Search logic for nested gameData ---
+            let radicalInfo = null;
+            for (const unitKey in gameData) {
+                const found = gameData[unitKey].radicals.find(r => r.char === char);
+                if (found) {
+                    radicalInfo = found;
+                    break;
+                }
+            }
+
+            if (radicalInfo) {
+                // Split "消 (Disappear)" into "消" and "Disappear"
+                const [fullChar, meaning] = radicalInfo.result.split(' ');
+                updateResultDisplay({
+                    char: fullChar,
+                    meaning: meaning ? meaning.replace(/[()]/g, '') : "Radical"
+                });
+            } else {
+                updateResultDisplay({ char: char, meaning: "Radical/Part" });
+            }
+        }
+
+        function updateResultDisplay(data) {
+            const charEl = document.getElementById('result-char');
+            const meaningEl = document.getElementById('result-meaning');
+            const resultBox = document.getElementById('combination-result');
+
+            if (charEl && meaningEl) {
+                charEl.textContent = data.char;
+                meaningEl.textContent = data.meaning || "Unknown Material";
+
+                // Minecraft-style "UI Select" animation
+                resultBox.style.transform = "scale(1.05)";
+                setTimeout(() => resultBox.style.transform = "scale(1.0)", 100);
+            }
         }
 
         function updateStyle() {
