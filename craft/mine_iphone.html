@@ -184,17 +184,120 @@
         .selected-info {
             font-size: 11px;
             color: #aaa;
-            padding: 0 12px 6px;
+            padding: 4px 12px 4px;
             background: #2a2a2a;
             border-bottom: 2px solid #333;
             display: flex;
             align-items: center;
             gap: 8px;
+            min-height: 32px;
         }
 
         .selected-info .sel-char {
             color: var(--gold);
             font-size: 18px;
+        }
+
+        /* ── EDITOR TRAY ── slides up when piece selected */
+        .editor-tray {
+            background: #1e1e1e;
+            border-bottom: 3px solid #444;
+            padding: 0 10px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.25s ease, padding 0.25s ease;
+        }
+
+        .editor-tray.open {
+            max-height: 160px;
+            padding: 10px 10px;
+        }
+
+        .tray-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .tray-label {
+            font-size: 9px;
+            color: var(--mc-green);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            flex-shrink: 0;
+            width: 38px;
+        }
+
+        /* Size slider */
+        .size-track {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .size-track span {
+            font-size: 10px;
+            color: #888;
+            min-width: 26px;
+            text-align: center;
+        }
+
+        input[type="range"].mc-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            background: #444;
+            border-radius: 0;
+            outline: none;
+        }
+
+        input[type="range"].mc-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--mc-green);
+            border: 2px solid #000;
+            cursor: pointer;
+        }
+
+        /* Color swatches */
+        .swatch-row {
+            flex: 1;
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .swatch {
+            width: 26px;
+            height: 26px;
+            border: 2px solid #000;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: transform 0.1s;
+        }
+
+        .swatch:active { transform: scale(0.85); }
+        .swatch.active-swatch { border-color: #fff; outline: 2px solid var(--mc-green); }
+
+        /* Reposition hint badge on board pieces when selected */
+        .placed-radical.selected-placed::after {
+            content: '✥';
+            position: absolute;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: rgba(255,255,255,0.7);
+            pointer-events: none;
+        }
+
+        #part-base.selected-base {
+            outline: 3px dashed rgba(255,255,255,0.5);
+            outline-offset: 4px;
         }
 
         /* ── SCROLL AREA ── */
@@ -548,6 +651,22 @@
     <span>TAP A RADICAL BELOW TO PLACE IT</span>
 </div>
 
+<!-- EDITOR TRAY: appears when a piece is selected -->
+<div class="editor-tray" id="editor-tray">
+    <div class="tray-row">
+        <div class="tray-label">SIZE</div>
+        <div class="size-track">
+            <span id="size-label">80</span>
+            <input type="range" class="mc-slider" id="size-slider" min="30" max="180" value="80" oninput="onSizeSlide(this.value)">
+            <span>↕</span>
+        </div>
+    </div>
+    <div class="tray-row">
+        <div class="tray-label">COLOR</div>
+        <div class="swatch-row" id="swatch-row"></div>
+    </div>
+</div>
+
 <!-- SCROLL AREA -->
 <div class="scroll-area">
     <!-- UNIT TABS -->
@@ -598,6 +717,15 @@
 </div>
 
 <script>
+// ── PALETTE ──
+const PALETTE = [
+    '#ffffff','#ffaa00','#ffff55','#55ff55','#55ffff',
+    '#5555ff','#ff55ff','#ff5555','#ff9944','#aaffaa',
+    '#00ccff','#ff88cc','#c8a064','#7cfc00','#ffd700',
+    '#ff6600',
+];
+
+// ── GAME DATA ──
 const gameData = {
     "unit1_xiao": { "base": "肖", "radicals": [
         { "char": "氵", "pos": "LEFT", "result": "消 (Disappear)" },
@@ -669,9 +797,11 @@ const gameData = {
     ]}
 };
 
+// ── STATE ──
 let selectedUnitKey = 'unit1_xiao';
 let pendingRadical = null;
-let selectedPlaced = null;
+let selectedPlaced = null;   // placed radical element, or null
+let selectedIsBase = false;  // true when base char is the selected piece
 let timerSeconds = 0;
 let timerInterval = null;
 let timerRunning = false;
@@ -679,18 +809,22 @@ let timerRunning = false;
 const board = document.getElementById('game-board');
 const partBase = document.getElementById('part-base');
 
-// Position map: maps position name → approximate CSS left/top on board
+// ── TOUCH DRAG + PINCH STATE ──
+let drag = { active: false, el: null, startX: 0, startY: 0, origLeft: 0, origTop: 0, isBase: false };
+let pinch = { active: false, el: null, startDist: 0, startFontSize: 80 };
+
 const posMap = {
-    'top-left':    { left: '15%', top:  '10%' },
-    'top':         { left: '50%', top:  '5%'  },
-    'top-right':   { left: '75%', top:  '10%' },
-    'left':        { left: '10%', top:  '40%' },
-    'center':      { left: '50%', top:  '40%' },
-    'right':       { left: '80%', top:  '40%' },
-    'bottom-left': { left: '15%', top:  '72%' },
-    'bottom':      { left: '50%', top:  '72%' },
+    'top-left':    { left: '15%', top: '10%' },
+    'top':         { left: '50%', top:  '5%' },
+    'top-right':   { left: '75%', top: '10%' },
+    'left':        { left: '10%', top: '40%' },
+    'center':      { left: '50%', top: '40%' },
+    'right':       { left: '80%', top: '40%' },
+    'bottom-left': { left: '15%', top: '72%' },
+    'bottom':      { left: '50%', top: '72%' },
 };
 
+// ── HELPERS ──
 function flash(msg) {
     const el = document.getElementById('flash-msg');
     el.textContent = msg;
@@ -712,14 +846,15 @@ function playTone(freq, type='square', dur=0.1) {
     } catch(e){}
 }
 
+function getFontSize(el) {
+    return parseInt(el.style.fontSize) || 80;
+}
+
 // ── TIMER ──
 function startTimer() {
     if (timerRunning) return;
     timerRunning = true;
-    timerInterval = setInterval(() => {
-        timerSeconds++;
-        updateTimerDisplay();
-    }, 1000);
+    timerInterval = setInterval(() => { timerSeconds++; updateTimerDisplay(); }, 1000);
 }
 
 function updateTimerDisplay() {
@@ -730,12 +865,172 @@ function updateTimerDisplay() {
 
 function restartTimer() {
     clearInterval(timerInterval);
-    timerRunning = false;
-    timerSeconds = 0;
-    updateTimerDisplay();
-    startTimer();
+    timerRunning = false; timerSeconds = 0;
+    updateTimerDisplay(); startTimer();
     flash('⏱ TIMER RESET!');
 }
+
+// ── EDITOR TRAY ──
+function buildSwatches() {
+    const row = document.getElementById('swatch-row');
+    row.innerHTML = '';
+    PALETTE.forEach(color => {
+        const s = document.createElement('div');
+        s.className = 'swatch';
+        s.style.background = color;
+        s.dataset.color = color;
+        s.onclick = () => applyColor(color, s);
+        row.appendChild(s);
+    });
+}
+
+function openTray(el) {
+    document.getElementById('editor-tray').classList.add('open');
+    const fs = getFontSize(el);
+    const slider = document.getElementById('size-slider');
+    slider.value = fs;
+    document.getElementById('size-label').textContent = fs;
+    // Highlight matching swatch
+    const cur = (el.style.color || '').toLowerCase();
+    document.querySelectorAll('.swatch').forEach(s =>
+        s.classList.toggle('active-swatch', s.dataset.color.toLowerCase() === cur));
+}
+
+function closeTray() {
+    document.getElementById('editor-tray').classList.remove('open');
+}
+
+function onSizeSlide(val) {
+    document.getElementById('size-label').textContent = val;
+    const el = selectedIsBase ? partBase : selectedPlaced;
+    if (el) el.style.fontSize = val + 'px';
+}
+
+function applyColor(color, swatchEl) {
+    const el = selectedIsBase ? partBase : selectedPlaced;
+    if (!el) return;
+    el.style.color = color;
+    document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active-swatch'));
+    swatchEl.classList.add('active-swatch');
+    playTone(700, 'sine', 0.06);
+}
+
+// ── SELECT / DESELECT ──
+function deselectAll() {
+    if (selectedPlaced) selectedPlaced.classList.remove('selected-placed');
+    if (selectedIsBase) partBase.classList.remove('selected-base');
+    selectedPlaced = null;
+    selectedIsBase = false;
+    closeTray();
+    document.getElementById('selected-info').innerHTML =
+        `<span>TAP A PIECE ON BOARD · OR TAP A RADICAL BELOW TO PLACE</span>`;
+}
+
+function selectPlaced(el) {
+    deselectAll();
+    selectedPlaced = el;
+    selectedIsBase = false;
+    el.classList.add('selected-placed');
+    document.getElementById('selected-info').innerHTML =
+        `<span>✎ <span class="sel-char">${el.dataset.char}</span> — drag · pinch · color · LAVA to delete</span>`;
+    openTray(el);
+    playTone(500, 'sine', 0.08);
+}
+
+function selectBase() {
+    deselectAll();
+    selectedIsBase = true;
+    partBase.classList.add('selected-base');
+    document.getElementById('selected-info').innerHTML =
+        `<span>✎ Base <span class="sel-char">${partBase.textContent}</span> — drag · pinch · pick color</span>`;
+    openTray(partBase);
+    playTone(480, 'sine', 0.08);
+}
+
+// Tap board background = deselect
+board.addEventListener('click', (e) => {
+    if (e.target === board || e.target.classList.contains('board-grid')) deselectAll();
+});
+
+// Tap base char — tap once to select, tap again to deselect
+partBase.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (selectedIsBase) deselectAll();
+    else selectBase();
+});
+
+// ── TOUCH DRAG (single finger) ──
+function attachTouchHandlers(el, isBase) {
+    el.addEventListener('touchstart', (e) => {
+        // Only handle touch if piece is already selected
+        const isSelected = isBase ? selectedIsBase : (selectedPlaced === el);
+        if (!isSelected) return;
+
+        if (e.touches.length === 1) {
+            const t = e.touches[0];
+            drag.active = true; drag.el = el; drag.isBase = isBase;
+            drag.startX = t.clientX; drag.startY = t.clientY;
+
+            if (isBase) {
+                // Resolve current pixel position from board
+                const bRect = board.getBoundingClientRect();
+                const eRect = el.getBoundingClientRect();
+                drag.origLeft = eRect.left - bRect.left + eRect.width / 2;
+                drag.origTop  = eRect.top  - bRect.top  + eRect.height / 2;
+            } else {
+                // Use % values stored in style
+                drag.origLeft = parseFloat(el.style.left) || 50;
+                drag.origTop  = parseFloat(el.style.top)  || 40;
+            }
+        } else if (e.touches.length === 2) {
+            drag.active = false;
+            pinch.active = true; pinch.el = el;
+            const dx = e.touches[0].clientX - e.touches[1].clientX;
+            const dy = e.touches[0].clientY - e.touches[1].clientY;
+            pinch.startDist = Math.hypot(dx, dy);
+            pinch.startFontSize = getFontSize(el);
+        }
+        e.stopPropagation();
+    }, { passive: true });
+}
+
+document.addEventListener('touchmove', (e) => {
+    if (drag.active && drag.el && e.touches.length === 1) {
+        const t = e.touches[0];
+        const dx = t.clientX - drag.startX;
+        const dy = t.clientY - drag.startY;
+        const bw = board.clientWidth || 1;
+        const bh = board.clientHeight || 1;
+
+        if (drag.isBase) {
+            const newLeft = drag.origLeft + dx;
+            const newTop  = drag.origTop  + dy;
+            drag.el.style.left = Math.max(0, Math.min(bw, newLeft)) + 'px';
+            drag.el.style.top  = Math.max(0, Math.min(bh, newTop))  + 'px';
+            drag.el.style.transform = 'translate(-50%, -50%)';
+        } else {
+            const newLeft = (drag.origLeft / 100 * bw + dx) / bw * 100;
+            const newTop  = (drag.origTop  / 100 * bh + dy) / bh * 100;
+            drag.el.style.left = Math.max(0, Math.min(100, newLeft)) + '%';
+            drag.el.style.top  = Math.max(0, Math.min(100, newTop))  + '%';
+        }
+        e.preventDefault();
+    }
+
+    if (pinch.active && pinch.el && e.touches.length === 2) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const scale = Math.hypot(dx, dy) / pinch.startDist;
+        const newSize = Math.max(24, Math.min(200, Math.round(pinch.startFontSize * scale)));
+        pinch.el.style.fontSize = newSize + 'px';
+        // Sync slider
+        document.getElementById('size-slider').value = newSize;
+        document.getElementById('size-label').textContent = newSize;
+        e.preventDefault();
+    }
+}, { passive: false });
+
+document.addEventListener('touchend', () => { drag.active = false; pinch.active = false; });
 
 // ── UNITS ──
 function renderUnits() {
@@ -754,15 +1049,17 @@ function setSelectedUnit(key) {
     selectedUnitKey = key;
     const unit = gameData[key];
     partBase.textContent = unit.base;
+    // Reset base to defaults
+    partBase.style.left = '50%'; partBase.style.top = '50%';
+    partBase.style.transform = 'translate(-50%,-50%)';
+    partBase.style.fontSize = '130px';
+    partBase.style.color = '#ffffff';
     partBase.classList.add('pulse');
     setTimeout(() => partBase.classList.remove('pulse'), 300);
 
     document.getElementById('result-char').textContent = unit.base;
     document.getElementById('result-meaning').textContent = 'Base Component';
-
-    document.querySelectorAll('.unit-tab').forEach(t => {
-        t.classList.toggle('selected', t.dataset.key === key || t.innerHTML.includes(key.replace(/_/g,' ')));
-    });
+    deselectAll();
     renderUnits();
     renderRadicals(key);
     playTone(440, 'sine', 0.15);
@@ -789,13 +1086,12 @@ function renderRadicals(key) {
 
 // ── RADICAL PLACEMENT ──
 function selectRadical(r, card) {
+    deselectAll();
     pendingRadical = r;
     document.querySelectorAll('.radical-card').forEach(c => c.classList.remove('tapped'));
     card.classList.add('tapped');
-
     document.getElementById('selected-info').innerHTML =
-        `<span>Placing: <span class="sel-char">${r.char}</span> — choose position on board or tap below ↓</span>`;
-
+        `<span>Placing: <span class="sel-char">${r.char}</span> — choose position ↓</span>`;
     document.getElementById('pos-selector').classList.add('visible');
     playTone(600, 'square', 0.08);
     startTimer();
@@ -811,58 +1107,50 @@ function placeAtPos(pos) {
     el.style.left = coords.left;
     el.style.top = coords.top;
     el.style.transform = 'translate(-50%, -50%)';
+    el.style.fontSize = '80px';
+    el.style.color = '#ffaa00';
     el.dataset.char = pendingRadical.char;
     el.dataset.result = pendingRadical.result;
-    el.onclick = () => selectPlaced(el);
+
+    el.addEventListener('click', (e) => { e.stopPropagation(); selectPlaced(el); });
+    attachTouchHandlers(el, false);
     board.appendChild(el);
 
-    // Update result
     const parts = pendingRadical.result.split(' ');
     document.getElementById('result-char').textContent = parts[0];
-    document.getElementById('result-meaning').textContent = parts.slice(1).join(' ').replace(/[()]/g,'') || 'Combined';
+    document.getElementById('result-meaning').textContent =
+        parts.slice(1).join(' ').replace(/[()]/g,'') || 'Combined';
 
     playTone(300, 'triangle', 0.2);
     flash(`⛏ PLACED: ${pendingRadical.char} → ${parts[0]}`);
     cancelPos();
+    // Auto-select so tray opens immediately
+    setTimeout(() => selectPlaced(el), 50);
 }
 
 function cancelPos() {
     document.getElementById('pos-selector').classList.remove('visible');
     pendingRadical = null;
-    document.getElementById('selected-info').innerHTML = `<span>TAP A RADICAL BELOW TO PLACE IT</span>`;
     document.querySelectorAll('.radical-card').forEach(c => c.classList.remove('tapped'));
-}
-
-function selectPlaced(el) {
-    if (selectedPlaced) selectedPlaced.classList.remove('selected-placed');
-    selectedPlaced = el;
-    el.classList.add('selected-placed');
-    document.getElementById('selected-info').innerHTML =
-        `<span>Selected: <span class="sel-char">${el.dataset.char}</span> — tap LAVA DELETE to remove</span>`;
-    playTone(500, 'sine', 0.08);
 }
 
 function deleteSelected() {
     if (selectedPlaced) {
         selectedPlaced.remove();
-        selectedPlaced = null;
+        deselectAll();
         document.getElementById('result-char').textContent = gameData[selectedUnitKey].base;
         document.getElementById('result-meaning').textContent = 'Base Component';
-        document.getElementById('selected-info').innerHTML = `<span>TAP A RADICAL BELOW TO PLACE IT</span>`;
         playTone(80, 'sawtooth', 0.3);
         flash('🌋 THROWN IN LAVA!');
     } else {
-        flash('⚠ SELECT A RADICAL ON BOARD FIRST');
+        flash('⚠ TAP A RADICAL ON THE BOARD FIRST');
     }
 }
 
 function clearBoard(silent) {
     board.querySelectorAll('.placed-radical').forEach(el => el.remove());
-    selectedPlaced = null;
-    if (!silent) {
-        flash('💥 BOARD CLEARED!');
-        playTone(120, 'sawtooth', 0.4);
-    }
+    deselectAll();
+    if (!silent) { flash('💥 BOARD CLEARED!'); playTone(120, 'sawtooth', 0.4); }
     document.getElementById('result-char').textContent = gameData[selectedUnitKey].base;
     document.getElementById('result-meaning').textContent = 'Base Component';
 }
@@ -877,11 +1165,10 @@ function renderDucks() {
         [indices[i],indices[j]] = [indices[j],indices[i]];
     }
     for (let i = 0; i < 3; i++) {
-        const delay = -(indices[i] * STEP);
         const duck = document.createElement('div');
         duck.className = 'character-duck';
         duck.innerHTML = `
-            <div class="duck-hat emoji-glow" style="--duck-delay:${delay}s"></div>
+            <div class="duck-hat emoji-glow" style="--duck-delay:${-(indices[i]*STEP)}s"></div>
             <img src="duckie.png" class="rubber-ducky-img" alt="duck">
         `;
         row.appendChild(duck);
@@ -889,6 +1176,8 @@ function renderDucks() {
 }
 
 // ── INIT ──
+buildSwatches();
+attachTouchHandlers(partBase, true);
 renderUnits();
 renderRadicals(selectedUnitKey);
 renderDucks();
