@@ -749,27 +749,25 @@
             activePart = newDiv;
             document.getElementById('target-name').innerText = char;
 
-            // --- Search logic for nested gameData ---
-            let radicalInfo = null;
-            for (const unitKey in gameData) {
-                const found = gameData[unitKey].radicals.find(r => r.char === char);
-                if (found) {
-                    radicalInfo = found;
-                    break;
-                }
-            }
+            // Direct lookup using the selected unit key
+            const currentUnit = gameData[selectedUnitKey];
+            const radicalInfo = currentUnit ? currentUnit.radicals.find(r => r.char === char) : null;
 
             if (radicalInfo) {
-                // Split "消 (Disappear)" into "消" and "Disappear"
-                const [fullChar, meaning] = radicalInfo.result.split(' ');
+                // Split "消 (Disappear)" into "消" and "(Disappear)"
+                const parts = radicalInfo.result.split(' ');
+                const displayChar = parts[0];
+                const displayMeaning = parts.slice(1).join(' ').replace(/[()]/g, '');
+
                 updateResultDisplay({
-                    char: fullChar,
-                    meaning: meaning ? meaning.replace(/[()]/g, '') : "Radical"
+                    char: displayChar,
+                    meaning: displayMeaning || "Combined"
                 });
             } else {
-                updateResultDisplay({ char: char, meaning: "Radical/Part" });
+                updateResultDisplay({ char: char, meaning: "Component" });
             }
         }
+
 
         function updateResultDisplay(data) {
             const charEl = document.getElementById('result-char');
@@ -829,6 +827,10 @@
             });
 
             renderRadicals(unitKey);
+            updateResultDisplay({
+                char: unit.base,
+                meaning: "Base Component"
+            });
         }
 
         function renderUnits() {
