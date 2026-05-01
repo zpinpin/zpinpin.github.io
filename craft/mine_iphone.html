@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hanzi Crafter · 诗仙密码</title>
+    <style>
+        :root {
+            --mc-green: #5aa742;
+            --mc-green-light: #7bc962;
+            --mc-dirt: #795548;
+            --mc-stone: #333333;
+            --mc-dark: #1a1a1a;
+            --mc-panel: #c6c6c6;
+            --mc-border-dark: #373737;
+            --mc-gray: #8b8b8b;
+            --lava: #ff6600;
+            --gold: #ffaa00;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--mc-dark);
+            color: #f1f1f1;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* ── HEADER ── */
+        .header {
+            background: #222;
+            border-bottom: 3px solid var(--mc-green);
+            padding: 10px 12px 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: var(--mc-green);
+            text-shadow: 1px 1px #000;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-title img {
+            height: 36px;
+            width: auto;
+        }
+
+        .timer-badge {
+            background: #404040;
+            border: 2px solid var(--mc-green);
+            color: var(--mc-green);
+            padding: 4px 10px;
+            font-size: 1em;
+            font-weight: bold;
+            min-width: 64px;
+            text-align: center;
+        }
+
+        /* ── CRAFT BOARD ── */
+        #game-board {
+            width: 100%;
+            height: 200px;
+            background: #5c5c5c;
+            border-bottom: 3px solid var(--mc-border-dark);
+            position: relative;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        .board-grid {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+
+        /* Base character on board */
+        #part-base {
+            position: absolute;
+            font-size: 130px;
+            color: #fff;
+            text-shadow: 3px 3px #000;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            user-select: none;
+            z-index: 2;
+            transition: transform 0.15s ease;
+        }
+
+        #part-base.pulse {
+            animation: basePulse 0.3s ease;
+        }
+
+        @keyframes basePulse {
+            0%   { transform: translate(-50%, -50%) scale(1); }
+            50%  { transform: translate(-50%, -50%) scale(1.08); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        /* Placed radical overlays on board */
+        .placed-radical {
+            position: absolute;
+            font-size: 80px;
+            color: var(--gold);
+            text-shadow: 2px 2px #000;
+            user-select: none;
+            z-index: 3;
+            cursor: pointer;
+            padding: 4px;
+            border: 2px solid transparent;
+            transition: border-color 0.15s;
+        }
+
+        .placed-radical.selected-placed {
+            border-color: #fff;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+        }
+
+        /* ── RESULT STRIP ── */
+        .result-strip {
+            background: #2a2a2a;
+            border-bottom: 3px solid var(--mc-border-dark);
+            display: flex;
+            align-items: center;
+            padding: 6px 12px;
+            gap: 12px;
+        }
+
+        .result-char-box {
+            background: var(--mc-gray);
+            border: 3px solid var(--mc-border-dark);
+            border-bottom-color: #fff;
+            border-right-color: #fff;
+            width: 52px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: #fff;
+            text-shadow: 2px 2px #000;
+            flex-shrink: 0;
+        }
+
+        .result-info {
+            flex: 1;
+        }
+
+        .result-label {
+            font-size: 9px;
+            color: #888;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .result-meaning {
+            font-size: 12px;
+            color: var(--mc-green-light);
+            font-weight: bold;
+            margin-top: 2px;
+        }
+
+        /* Active radical indicator */
+        .selected-info {
+            font-size: 11px;
+            color: #aaa;
+            padding: 0 12px 6px;
+            background: #2a2a2a;
+            border-bottom: 2px solid #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .selected-info .sel-char {
+            color: var(--gold);
+            font-size: 18px;
+        }
+
+        /* ── SCROLL AREA ── */
+        .scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0 0 80px 0;
+        }
+
+        /* ── UNIT TABS ── */
+        .unit-scroll {
+            display: flex;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 8px 10px;
+            gap: 6px;
+            background: #222;
+            border-bottom: 2px solid #333;
+            scrollbar-width: none;
+        }
+
+        .unit-scroll::-webkit-scrollbar { display: none; }
+
+        .unit-tab {
+            flex-shrink: 0;
+            background: #3a3a3a;
+            border: 2px solid #555;
+            color: #ccc;
+            padding: 6px 12px;
+            font-family: inherit;
+            font-size: 11px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: 0.15s;
+        }
+
+        .unit-tab:active { opacity: 0.7; }
+        .unit-tab.selected {
+            background: #2a4a2a;
+            border-color: var(--mc-green);
+            color: var(--mc-green);
+        }
+
+        /* ── RADICAL GRID ── */
+        .section-title {
+            padding: 10px 12px 6px;
+            font-size: 10px;
+            color: var(--mc-green);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: #222;
+        }
+
+        .radical-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            padding: 0 10px 10px;
+        }
+
+        .radical-card {
+            background: #3a3a3a;
+            border: 2px solid #555;
+            border-top-color: #666;
+            border-left-color: #666;
+            padding: 10px 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: background 0.12s, transform 0.1s;
+            min-height: 80px;
+            justify-content: center;
+        }
+
+        .radical-card:active {
+            transform: scale(0.95);
+            background: #2a4a2a;
+        }
+
+        .radical-card.tapped {
+            background: #1a3a1a;
+            border-color: var(--mc-green);
+        }
+
+        .radical-char {
+            font-size: 32px;
+            color: var(--gold);
+            text-shadow: 1px 1px #000;
+        }
+
+        .radical-pos {
+            font-size: 9px;
+            color: #888;
+            letter-spacing: 1px;
+        }
+
+        .radical-result {
+            font-size: 10px;
+            color: #bbb;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        /* ── BOTTOM ACTION BAR ── */
+        .action-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #222;
+            border-top: 3px solid #444;
+            display: flex;
+            gap: 0;
+            z-index: 200;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 14px 8px;
+            border: none;
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            transition: opacity 0.1s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .action-btn:active { opacity: 0.7; }
+
+        .btn-lava {
+            background: #7a1a00;
+            color: #ff9944;
+            border-right: 2px solid #444;
+        }
+
+        .btn-clear {
+            background: #4a4a00;
+            color: #ffff55;
+            border-right: 2px solid #444;
+        }
+
+        .btn-restart {
+            background: #004a00;
+            color: var(--mc-green-light);
+        }
+
+        .btn-icon { font-size: 18px; }
+
+        /* ── DUCKS ── */
+        .duck-row {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            padding: 16px 0 8px;
+        }
+
+        .character-duck {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .rubber-ducky-img {
+            width: 44px;
+            height: auto;
+        }
+
+        .duck-hat {
+            position: absolute;
+            top: -12px;
+            z-index: 2;
+            background: #8B5A2B;
+            border: 2px solid #3d2511;
+            border-radius: 2px;
+            padding: 1px 4px 1px 8px;
+            min-width: 58px;
+            display: flex;
+            flex-direction: row-reverse;
+            align-items: center;
+            justify-content: center;
+            animation: mineVibrate 0.2s linear infinite;
+        }
+
+        .duck-hat::before {
+            content: "⛏️";
+            position: absolute;
+            right: 3px;
+            top: 50%;
+            transform-origin: top right;
+            font-size: 13px;
+            z-index: 3;
+            animation: pickSwing 0.4s ease-in-out infinite;
+        }
+
+        .duck-hat::after {
+            content: "亻";
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            font-size: 16px;
+            color: #f5deb3;
+            font-weight: bold;
+            margin-right: 2px;
+            animation: radicalSwap 48s steps(1, end) infinite;
+            animation-delay: var(--duck-delay, 0s);
+        }
+
+        .emoji-glow::after {
+            font-size: 14px;
+            display: inline-block;
+            animation:
+                emojiSwap 48s steps(1, end) infinite,
+                pulseGlow 2s ease-in-out infinite;
+            animation-delay: var(--duck-delay, 0s), 0s;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { filter: drop-shadow(0 0 2px rgba(255,255,255,0.2)); }
+            50% { filter: drop-shadow(0 0 6px #FFD700) drop-shadow(0 0 3px #FFF); }
+        }
+        @keyframes pickSwing {
+            0%, 100% { transform: translateY(-50%) rotate(0deg); }
+            50% { transform: translateY(-50%) rotate(-35deg); }
+        }
+        @keyframes mineVibrate {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(1px, -1px); }
+            75% { transform: translate(-1px, 1px); }
+        }
+        @keyframes radicalSwap {
+            0.00%{content:"亻"}4.17%{content:"口"}8.33%{content:"女"}
+            12.50%{content:"宀"}16.67%{content:"山"}20.83%{content:"心"}
+            25.00%{content:"忄"}29.17%{content:"扌"}33.33%{content:"攵"}
+            37.50%{content:"日"}41.67%{content:"月"}45.83%{content:"木"}
+            50.00%{content:"氵"}54.17%{content:"犭"}58.33%{content:"石"}
+            62.50%{content:"米"}66.67%{content:"艹"}70.83%{content:"讠"}
+            75.00%{content:"车"}79.17%{content:"金"}83.33%{content:"雨"}
+            87.50%{content:"马"}91.67%{content:"鱼"}95.83%{content:"鸟"}
+        }
+        @keyframes emojiSwap {
+            0.00%{content:"👤"}4.17%{content:"👄"}8.33%{content:"👩"}
+            12.50%{content:"🏠"}16.67%{content:"⛰️"}20.83%{content:"❤️"}
+            25.00%{content:"❤️"}29.17%{content:"🖐️"}33.33%{content:"👊"}
+            37.50%{content:"☀️"}41.67%{content:"🌙"}45.83%{content:"🌲"}
+            50.00%{content:"💧"}54.17%{content:"🐕"}58.33%{content:"🪨"}
+            62.50%{content:"🍚"}66.67%{content:"🌱"}70.83%{content:"🗣️"}
+            75.00%{content:"🚗"}79.17%{content:"👑"}83.33%{content:"🌧️"}
+            87.50%{content:"🐎"}91.67%{content:"🐟"}95.83%{content:"🕊️"}
+        }
+
+        /* Placement position buttons */
+        .pos-selector {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.9);
+            border-top: 2px solid var(--mc-green);
+            padding: 12px;
+            z-index: 300;
+        }
+
+        .pos-selector.visible { display: block; }
+
+        .pos-title {
+            font-size: 11px;
+            color: var(--mc-green);
+            text-align: center;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .pos-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+
+        .pos-btn {
+            background: #3a3a3a;
+            border: 2px solid #555;
+            color: #ccc;
+            padding: 10px 4px;
+            font-family: inherit;
+            font-size: 10px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .pos-btn:active { background: #2a4a2a; }
+
+        /* Feedback flash */
+        .flash-msg {
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(90,167,66,0.95);
+            color: #fff;
+            padding: 8px 18px;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .flash-msg.show { opacity: 1; }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    <div class="header-title">
+        <img src="Li.png" alt="">
+        HANZI CRAFTER
+    </div>
+    <div class="timer-badge" id="timer-display">00:00</div>
+</div>
+
+<!-- GAME BOARD -->
+<div id="game-board">
+    <div class="board-grid"></div>
+    <div id="part-base">肖</div>
+    <!-- placed radicals appear here -->
+</div>
+
+<!-- RESULT STRIP -->
+<div class="result-strip">
+    <div class="result-char-box" id="result-char">-</div>
+    <div class="result-info">
+        <div class="result-label">CRAFTED RESULT</div>
+        <div class="result-meaning" id="result-meaning">Select a radical →</div>
+    </div>
+</div>
+
+<!-- SELECTED INFO -->
+<div class="selected-info" id="selected-info">
+    <span>TAP A RADICAL BELOW TO PLACE IT</span>
+</div>
+
+<!-- SCROLL AREA -->
+<div class="scroll-area">
+    <!-- UNIT TABS -->
+    <div class="section-title">[ UNITS ]</div>
+    <div class="unit-scroll" id="unit-list"></div>
+
+    <!-- RADICAL GRID -->
+    <div class="section-title">[ RADICAL INVENTORY ]</div>
+    <div class="radical-grid" id="radical-inventory"></div>
+
+    <!-- DUCKS -->
+    <div class="duck-row" id="duck-row"></div>
+</div>
+
+<!-- POSITION SELECTOR (appears when radical tapped) -->
+<div class="pos-selector" id="pos-selector">
+    <div class="pos-title">— PLACE RADICAL: CHOOSE POSITION —</div>
+    <div class="pos-grid">
+        <div class="pos-btn" data-pos="top-left"  onclick="placeAtPos('top-left')">↖ TOP-LEFT</div>
+        <div class="pos-btn" data-pos="top"       onclick="placeAtPos('top')">⬆ TOP</div>
+        <div class="pos-btn" data-pos="top-right" onclick="placeAtPos('top-right')">↗ TOP-RIGHT</div>
+        <div class="pos-btn" data-pos="left"      onclick="placeAtPos('left')">⬅ LEFT</div>
+        <div class="pos-btn" data-pos="center"    onclick="placeAtPos('center')">⊕ CENTER</div>
+        <div class="pos-btn" data-pos="right"     onclick="placeAtPos('right')">➡ RIGHT</div>
+        <div class="pos-btn" data-pos="bottom-left"  onclick="placeAtPos('bottom-left')">↙ BTM-LEFT</div>
+        <div class="pos-btn" data-pos="bottom"    onclick="placeAtPos('bottom')">⬇ BOTTOM</div>
+        <div class="pos-btn" data-pos="cancel"    onclick="cancelPos()" style="background:#440000;color:#ff9944;border-color:#880000;">✕ CANCEL</div>
+    </div>
+</div>
+
+<!-- FLASH MESSAGE -->
+<div class="flash-msg" id="flash-msg"></div>
+
+<!-- BOTTOM ACTION BAR -->
+<div class="action-bar">
+    <button class="action-btn btn-lava" onclick="deleteSelected()">
+        <span class="btn-icon">🌋</span>
+        LAVA DELETE
+    </button>
+    <button class="action-btn btn-clear" onclick="clearBoard()">
+        <span class="btn-icon">💥</span>
+        CLEAR ALL
+    </button>
+    <button class="action-btn btn-restart" onclick="restartTimer()">
+        <span class="btn-icon">⏱</span>
+        RESET TIMER
+    </button>
+</div>
+
+<script>
+const gameData = {
+    "unit1_xiao": { "base": "肖", "radicals": [
+        { "char": "氵", "pos": "LEFT", "result": "消 (Disappear)" },
+        { "char": "口", "pos": "LEFT", "result": "哨 (Whistle)" },
+        { "char": "钅", "pos": "RIGHT", "result": "销 (Melt/Sell)" }
+    ]},
+    "unit2_jian": { "base": "斩", "radicals": [
+        { "char": "氵", "pos": "LEFT", "result": "渐 (Gradually)" },
+        { "char": "山", "pos": "TOP", "result": "崭 (Towering)" },
+        { "char": "土", "pos": "BOTTOM", "result": "堑 (Moat)" },
+        { "char": "忄", "pos": "LEFT", "result": "惭 (Ashamed)" },
+        { "char": "日", "pos": "TOP", "result": "暂 (Temporary)" }
+    ]},
+    "unit3_chuan": { "base": "专", "radicals": [
+        { "char": "亻", "pos": "LEFT", "result": "传 (Pass on)" },
+        { "char": "石", "pos": "LEFT", "result": "砖 🧱" },
+        { "char": "车", "pos": "LEFT", "result": "转 (Turn)" }
+    ]},
+    "unit4_zhi": { "base": "知", "radicals": [
+        { "char": "日", "pos": "BOTTOM", "result": "智 (Wisdom)" },
+        { "char": "疒", "pos": "OUTSIDE", "result": "痴 (Daft)" },
+        { "char": "虫", "pos": "LEFT", "result": "蜘 (Spider)" }
+    ]},
+    "unit5_sou": { "base": "叟", "radicals": [
+        { "char": "饣", "pos": "LEFT", "result": "馊 (Rancid)" },
+        { "char": "扌", "pos": "LEFT", "result": "搜 (Search)" },
+        { "char": "虫", "pos": "LEFT", "result": "螋 (Earwig)" },
+        { "char": "女", "pos": "LEFT", "result": "嫂 (Sister-in-law)" }
+    ]},
+    "unit6_chao": { "base": "朝", "radicals": [
+        { "char": "氵", "pos": "LEFT", "result": "潮 (Tide)" },
+        { "char": "口", "pos": "LEFT", "result": "嘲 (Mock)" }
+    ]},
+    "unit7_ben": { "base": "本", "radicals": [
+        { "char": "⺮", "pos": "TOP", "result": "笨 (Stupid)" },
+        { "char": "钅", "pos": "BOTTOM", "result": "钵 (Bowl)" },
+        { "char": "亻", "pos": "BOTTOM", "result": "体 (Body)" }
+    ]},
+    "unit8_hutulu": { "base": "胡", "radicals": [
+        { "char": "米", "pos": "LEFT", "result": "糊 (Paste)" },
+        { "char": "氵", "pos": "LEFT", "result": "湖 (Lake)" },
+        { "char": "艹", "pos": "TOP", "result": "葫 (Gourd)" },
+        { "char": "虫", "pos": "LEFT", "result": "蝴蝶 (Butterfly)" },
+        { "char": "犭", "pos": "LEFT", "result": "猢 (Monkey)" }
+    ]},
+    "unit9_tuan": { "base": "才", "radicals": [
+        { "char": "囗", "pos": "OUTSIDE", "result": "团 (Group)" },
+        { "char": "门", "pos": "OUTSIDE", "result": "闭 (Close)" }
+    ]},
+    "unit10_jianshi": { "base": "寺", "radicals": [
+        { "char": "讠", "pos": "LEFT", "result": "诗 (Poem)" },
+        { "char": "扌", "pos": "LEFT", "result": "持 (Hold)" },
+        { "char": "彳", "pos": "LEFT", "result": "待 (Wait)" },
+        { "char": "牛", "pos": "LEFT", "result": "特 (Special)" },
+        { "char": "竹", "pos": "TOP", "result": "等 (Wait/Rank)" },
+        { "char": "亻", "pos": "LEFT", "result": "侍 (Serve)" }
+    ]},
+    "unit13_zhi": { "base": "止", "radicals": [
+        { "char": "足", "pos": "LEFT", "result": "趾 (Toe)" },
+        { "char": "山", "pos": "LEFT", "result": "歧 (Divergent)" },
+        { "char": "氵", "pos": "LEFT", "result": "涩 (Astringent)" },
+        { "char": "人", "pos": "TOP", "result": "企 (Enterprise)" },
+        { "char": "月", "pos": "BOTTOM", "result": "肯 (Willing)" }
+    ]},
+    "unit14_xian": { "base": "山", "radicals": [
+        { "char": "亻", "pos": "LEFT", "result": "仙 (Immortal)" },
+        { "char": "火", "pos": "LEFT", "result": "灿 (Brilliant)" },
+        { "char": "氵", "pos": "LEFT", "result": "汕 (Shantou)" }
+    ]}
+};
+
+let selectedUnitKey = 'unit1_xiao';
+let pendingRadical = null;
+let selectedPlaced = null;
+let timerSeconds = 0;
+let timerInterval = null;
+let timerRunning = false;
+
+const board = document.getElementById('game-board');
+const partBase = document.getElementById('part-base');
+
+// Position map: maps position name → approximate CSS left/top on board
+const posMap = {
+    'top-left':    { left: '15%', top:  '10%' },
+    'top':         { left: '50%', top:  '5%'  },
+    'top-right':   { left: '75%', top:  '10%' },
+    'left':        { left: '10%', top:  '40%' },
+    'center':      { left: '50%', top:  '40%' },
+    'right':       { left: '80%', top:  '40%' },
+    'bottom-left': { left: '15%', top:  '72%' },
+    'bottom':      { left: '50%', top:  '72%' },
+};
+
+function flash(msg) {
+    const el = document.getElementById('flash-msg');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove('show'), 1500);
+}
+
+function playTone(freq, type='square', dur=0.1) {
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = type; osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.08, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+        osc.start(); osc.stop(ctx.currentTime + dur);
+    } catch(e){}
+}
+
+// ── TIMER ──
+function startTimer() {
+    if (timerRunning) return;
+    timerRunning = true;
+    timerInterval = setInterval(() => {
+        timerSeconds++;
+        updateTimerDisplay();
+    }, 1000);
+}
+
+function updateTimerDisplay() {
+    const m = String(Math.floor(timerSeconds/60)).padStart(2,'0');
+    const s = String(timerSeconds%60).padStart(2,'0');
+    document.getElementById('timer-display').textContent = `${m}:${s}`;
+}
+
+function restartTimer() {
+    clearInterval(timerInterval);
+    timerRunning = false;
+    timerSeconds = 0;
+    updateTimerDisplay();
+    startTimer();
+    flash('⏱ TIMER RESET!');
+}
+
+// ── UNITS ──
+function renderUnits() {
+    const ul = document.getElementById('unit-list');
+    ul.innerHTML = '';
+    Object.entries(gameData).forEach(([key, unit]) => {
+        const tab = document.createElement('div');
+        tab.className = 'unit-tab' + (key === selectedUnitKey ? ' selected' : '');
+        tab.innerHTML = `${key.replace(/_/g,' ')} <b style="color:#ffaa00">${unit.base}</b>`;
+        tab.onclick = () => setSelectedUnit(key);
+        ul.appendChild(tab);
+    });
+}
+
+function setSelectedUnit(key) {
+    selectedUnitKey = key;
+    const unit = gameData[key];
+    partBase.textContent = unit.base;
+    partBase.classList.add('pulse');
+    setTimeout(() => partBase.classList.remove('pulse'), 300);
+
+    document.getElementById('result-char').textContent = unit.base;
+    document.getElementById('result-meaning').textContent = 'Base Component';
+
+    document.querySelectorAll('.unit-tab').forEach(t => {
+        t.classList.toggle('selected', t.dataset.key === key || t.innerHTML.includes(key.replace(/_/g,' ')));
+    });
+    renderUnits();
+    renderRadicals(key);
+    playTone(440, 'sine', 0.15);
+    clearBoard(true);
+}
+
+function renderRadicals(key) {
+    const inv = document.getElementById('radical-inventory');
+    inv.innerHTML = '';
+    const unit = gameData[key];
+    unit.radicals.forEach(r => {
+        const card = document.createElement('div');
+        card.className = 'radical-card';
+        const [resultChar, ...rest] = r.result.split(' ');
+        card.innerHTML = `
+            <div class="radical-char">${r.char}</div>
+            <div class="radical-pos">${r.pos}</div>
+            <div class="radical-result">${resultChar}<br><span style="font-size:9px;color:#888">${rest.join(' ')}</span></div>
+        `;
+        card.onclick = () => selectRadical(r, card);
+        inv.appendChild(card);
+    });
+}
+
+// ── RADICAL PLACEMENT ──
+function selectRadical(r, card) {
+    pendingRadical = r;
+    document.querySelectorAll('.radical-card').forEach(c => c.classList.remove('tapped'));
+    card.classList.add('tapped');
+
+    document.getElementById('selected-info').innerHTML =
+        `<span>Placing: <span class="sel-char">${r.char}</span> — choose position on board or tap below ↓</span>`;
+
+    document.getElementById('pos-selector').classList.add('visible');
+    playTone(600, 'square', 0.08);
+    startTimer();
+}
+
+function placeAtPos(pos) {
+    if (!pendingRadical || pos === 'cancel') { cancelPos(); return; }
+    const coords = posMap[pos] || { left: '50%', top: '40%' };
+
+    const el = document.createElement('div');
+    el.className = 'placed-radical';
+    el.textContent = pendingRadical.char;
+    el.style.left = coords.left;
+    el.style.top = coords.top;
+    el.style.transform = 'translate(-50%, -50%)';
+    el.dataset.char = pendingRadical.char;
+    el.dataset.result = pendingRadical.result;
+    el.onclick = () => selectPlaced(el);
+    board.appendChild(el);
+
+    // Update result
+    const parts = pendingRadical.result.split(' ');
+    document.getElementById('result-char').textContent = parts[0];
+    document.getElementById('result-meaning').textContent = parts.slice(1).join(' ').replace(/[()]/g,'') || 'Combined';
+
+    playTone(300, 'triangle', 0.2);
+    flash(`⛏ PLACED: ${pendingRadical.char} → ${parts[0]}`);
+    cancelPos();
+}
+
+function cancelPos() {
+    document.getElementById('pos-selector').classList.remove('visible');
+    pendingRadical = null;
+    document.getElementById('selected-info').innerHTML = `<span>TAP A RADICAL BELOW TO PLACE IT</span>`;
+    document.querySelectorAll('.radical-card').forEach(c => c.classList.remove('tapped'));
+}
+
+function selectPlaced(el) {
+    if (selectedPlaced) selectedPlaced.classList.remove('selected-placed');
+    selectedPlaced = el;
+    el.classList.add('selected-placed');
+    document.getElementById('selected-info').innerHTML =
+        `<span>Selected: <span class="sel-char">${el.dataset.char}</span> — tap LAVA DELETE to remove</span>`;
+    playTone(500, 'sine', 0.08);
+}
+
+function deleteSelected() {
+    if (selectedPlaced) {
+        selectedPlaced.remove();
+        selectedPlaced = null;
+        document.getElementById('result-char').textContent = gameData[selectedUnitKey].base;
+        document.getElementById('result-meaning').textContent = 'Base Component';
+        document.getElementById('selected-info').innerHTML = `<span>TAP A RADICAL BELOW TO PLACE IT</span>`;
+        playTone(80, 'sawtooth', 0.3);
+        flash('🌋 THROWN IN LAVA!');
+    } else {
+        flash('⚠ SELECT A RADICAL ON BOARD FIRST');
+    }
+}
+
+function clearBoard(silent) {
+    board.querySelectorAll('.placed-radical').forEach(el => el.remove());
+    selectedPlaced = null;
+    if (!silent) {
+        flash('💥 BOARD CLEARED!');
+        playTone(120, 'sawtooth', 0.4);
+    }
+    document.getElementById('result-char').textContent = gameData[selectedUnitKey].base;
+    document.getElementById('result-meaning').textContent = 'Base Component';
+}
+
+// ── DUCKS ──
+function renderDucks() {
+    const row = document.getElementById('duck-row');
+    const CYCLE = 48, TOTAL = 24, STEP = CYCLE / TOTAL;
+    const indices = Array.from({length: TOTAL}, (_,i) => i);
+    for (let i = indices.length-1; i>0; i--) {
+        const j = Math.floor(Math.random()*(i+1));
+        [indices[i],indices[j]] = [indices[j],indices[i]];
+    }
+    for (let i = 0; i < 3; i++) {
+        const delay = -(indices[i] * STEP);
+        const duck = document.createElement('div');
+        duck.className = 'character-duck';
+        duck.innerHTML = `
+            <div class="duck-hat emoji-glow" style="--duck-delay:${delay}s"></div>
+            <img src="duckie.png" class="rubber-ducky-img" alt="duck">
+        `;
+        row.appendChild(duck);
+    }
+}
+
+// ── INIT ──
+renderUnits();
+renderRadicals(selectedUnitKey);
+renderDucks();
+startTimer();
+</script>
+</body>
+</html>
