@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>小明和小河 · 词汇练习</title>
+<style>
+:root{--bg:#EEF8F0;--card:#fff;--ink:#2F3A33;--head:#2F6B4F;--muted:#6C8A79;--dash:#BFE0CC;--chip:#DDF3E5;--chipink:#1F5C3F;--shown:#FFF1CC;--shownink:#8A4B00;--btn:#2F6B4F;--btnink:#fff;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12201A;--card:#1B2D24;--ink:#E6F2EA;--head:#8FE0B4;--muted:#9DBBAA;--dash:#37594A;--chip:#254636;--chipink:#BDF2D3;--shown:#4A3A12;--shownink:#FFD98A;--btn:#8FE0B4;--btnink:#12201A;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#12201A;--card:#1B2D24;--ink:#E6F2EA;--head:#8FE0B4;--muted:#9DBBAA;--dash:#37594A;--chip:#254636;--chipink:#BDF2D3;--shown:#4A3A12;--shownink:#FFD98A;--btn:#8FE0B4;--btnink:#12201A;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Serif SC","Songti SC","SimSun",serif}
+main{max-width:640px;margin:0 auto;padding:22px 16px 48px}
+h1{text-align:center;color:var(--head);font-size:28px;margin:6px 0 4px}
+.sub{text-align:center;color:var(--muted);font-size:14px;margin:0 0 14px;font-family:system-ui,sans-serif}
+.tools{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:18px;font-family:system-ui,sans-serif}
+.btn{font:inherit;font-weight:700;font-size:14px;background:var(--btn);color:var(--btnink);border:0;border-radius:999px;padding:8px 16px;cursor:pointer}
+.count{font-size:14px;color:var(--muted)}
+.card{position:relative;background:var(--card);border:3px dashed var(--dash);border-radius:22px;padding:18px 20px 20px}
+.lab{font-size:12px;font-weight:700;color:var(--head);font-family:system-ui,sans-serif;margin-bottom:6px}
+.txt{font-size:19px;line-height:2.3}
+.chip{font:inherit;font-size:15px;font-weight:700;font-family:system-ui,sans-serif;background:var(--chip);color:var(--chipink);border:0;border-radius:10px;padding:3px 9px;margin:0 2px;cursor:pointer;white-space:nowrap}
+.chip.on{background:var(--shown);color:var(--shownink);font-family:inherit;font-size:19px}
+.div{text-align:center;font-size:22px;letter-spacing:12px;margin:10px 0}
+</style>
+</head>
+<body>
+<main>
+<h1>🌲 小明和小河 💧</h1>
+<p class="sub">词汇练习 · 看拼音，想一想汉字，点一下看答案</p>
+<div class="tools"><button class="btn" id="all">显示全部汉字</button><button class="btn" id="none">全部隐藏</button><span class="count" id="cnt"></span></div>
+<div id="story"></div>
+</main>
+<script>
+const D={"力气":["lì qì","💪"],"父亲":["fù qīn","👨"],"那些":["nà xiē","👉"],"重量":["zhòng liàng","⚖️"],"怎样":["zěn yàng","❓"],"不够":["bú gòu","🤏"],"中国":["zhōng guó","🏯"],"时候":["shí hou","⏰"],"需要":["xū yào","🙏"],"着急":["zháo jí","😰"],"疼痛":["téng tòng","🤕"],"停下":["tíng xià","🛑"],"工具":["gōng jù","🔧"],"森林":["sēn lín","🌲"],"肚子":["dù zi","😋"],"食物":["shí wù","🍎"],"奇怪":["qí guài","🤔"],"受骗":["shòu piàn","🤥"],"愿意":["yuàn yì","🙋"],"做事":["zuò shì","🧹"],"小河":["xiǎo hé","🏞️"],"突然":["tū rán","⚡"],"危险":["wēi xiǎn","⚠️"],"浅":["qiǎn","💧"],"深":["shēn","🌊"],"喜欢":["xǐ huan","❤️"],"快乐":["kuài lè","😄"],"关心":["guān xīn","🤗"],"带着":["dài zhe","🎒"]};
+const P=[
+"小明住在{中国}。他的{父亲}很{关心}他，常常{带着}他去{森林}。小明很{喜欢}{森林}，在那里他很{快乐}。",
+"有一天，{父亲}说：“今天我们要去{小河}边。我们{需要}带一些{工具}和{食物}。”小明的{力气}不大，可是他{愿意}{做事}。",
+"出门的{时候}，小明背着一个大包。包的{重量}很重，他的{力气}好像{不够}。小明有点{着急}：“爸爸，{怎样}才能走得快呢？”走了很久，他的{肚子}饿了，脚也有点{疼痛}。{父亲}说：“我们{停下}来休息吧。”",
+"休息以后，他们走到了{小河}边。小明{突然}看见河水很{深}，很{危险}！{那些}石头很{奇怪}，他想起了小马过河的故事。小马差点{受骗}，因为有人说河水很{深}，有人说河水很{浅}。",
+"{父亲}说：“你自己去试一试。”小明把脚伸到进河里试了一下，河水很{浅}，一点也不{危险}。小明很{快乐}！"];
+const labels=["第一段","第二段","第三段","第四段","第五段"],seps=["🌲 🐦 🌸 🌿 🌿 🌸 🐶 🌲","🌲 🐦 🌸 🌿 🌿 🌸 🐶 🌲","🌲 🐦 🌸 🌿 🌿 🌸 🐶 🌲","🌲 🐦 🌸 🌿 🌿 🌸 🐶 🌲"];
+const root=document.getElementById("story");
+root.innerHTML=P.map((p,i)=>`<div class="card"><div class="lab">${labels[i]}</div><div class="txt">${p.replace(/\{([^}]+)\}/g,(m,w)=>`<button class="chip" data-w="${w}" aria-label="${D[w][0]}，点击显示汉字">${D[w][1]} ${D[w][0]}</button>`)}</div></div>`+(i<4?`<div class="div" aria-hidden="true">${seps[i]}</div>`:"")).join("");
+const chips=[...root.querySelectorAll(".chip")];
+function set(c,on){c.classList.toggle("on",on);c.textContent=on?c.dataset.w:D[c.dataset.w][1]+" "+D[c.dataset.w][0]}
+function upd(){const s=new Set(chips.filter(c=>c.classList.contains("on")).map(c=>c.dataset.w));document.getElementById("cnt").textContent=`已看 ${s.size} / ${Object.keys(D).length} 个词`}
+chips.forEach(c=>c.onclick=()=>{set(c,!c.classList.contains("on"));upd()});
+document.getElementById("all").onclick=()=>{chips.forEach(c=>set(c,true));upd()};
+document.getElementById("none").onclick=()=>{chips.forEach(c=>set(c,false));upd()};
+upd();
+</script>
+</body>
+</html>
